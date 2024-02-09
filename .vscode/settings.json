@@ -1,5 +1,7 @@
 {
     "cSpell.words": [
         "microcontroller"
-    ]
+    ],
+    "cmake.sourceDirectory": "/home/alexander/Projects/oscilloscope-rendering/firmware",
+    "cmake.configureOnOpen": true
 }

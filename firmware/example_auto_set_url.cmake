@@ -1,0 +1,1 @@
+/home/alexander/Projects/pico/workspace-template/example_auto_set_url.cmake

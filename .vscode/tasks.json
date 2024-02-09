@@ -1,0 +1,42 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cmake",
+            "label": "CMake: build main",
+            "command": "build",
+            "targets": [
+                "main"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}/firmware"
+            },
+            "group": "build"
+        },
+        {
+            "type": "shell",
+            "label": "Pico: flash",
+            "command": [
+                "scripts/flash.exp",
+                "main.elf"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}/firmware"
+            },
+            "group": "test",
+
+            "dependsOn": ["CMake: build main"]
+        },
+        {
+            "type": "shell",
+            "label": "Pico: launch openocd",
+            "command": [
+                "scripts/launch_openocd.sh"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}/firmware"
+            },
+            "isBackground": true
+        }
+    ]
+}

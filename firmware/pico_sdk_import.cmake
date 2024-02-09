@@ -1,0 +1,1 @@
+/home/alexander/Projects/pico/workspace-template/pico_sdk_import.cmake
