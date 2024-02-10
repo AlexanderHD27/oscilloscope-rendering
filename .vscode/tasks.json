@@ -18,7 +18,7 @@
             "label": "Pico: flash main",
             "command": [
                 "scripts/flash.exp",
-                "main.elf"
+                "${workspaceRoot}/firmware/build/main.elf"
             ],
             "options": {
                 "cwd": "${workspaceRoot}/firmware"
@@ -45,7 +45,7 @@
             "label": "Pico: flash usb_test",
             "command": [
                 "scripts/flash.exp",
-                "usb_test.elf"
+                "${workspaceRoot}/firmware/build/usb_test/usb_test.elf"
             ],
             "options": {
                 "cwd": "${workspaceRoot}/firmware"

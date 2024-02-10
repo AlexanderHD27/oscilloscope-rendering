@@ -50,4 +50,4 @@ pico_add_extra_outputs(main)
 # add url via pico_set_program_url
 example_auto_set_url(main)
 
-add_subdirectory(src/usb_test usb_test)
+add_subdirectory(src/usb_test)

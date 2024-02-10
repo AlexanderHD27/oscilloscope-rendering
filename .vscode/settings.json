@@ -7,5 +7,6 @@
     "cmake.configureOnOpen": true,
     "files.associations": {
         "timer.h": "c"
-    }
+    },
+    
 }
