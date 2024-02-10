@@ -11,7 +11,15 @@
             "options": {
                 "cwd": "${workspaceRoot}/firmware"
             },
-            "group": "build"
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
         },
         {
             "type": "shell",
@@ -25,7 +33,15 @@
             },
             "group": "test",
 
-            "dependsOn": ["CMake: build main"]
+            "dependsOn": ["CMake: build main"],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
         },
 
         {
@@ -38,7 +54,15 @@
             "options": {
                 "cwd": "${workspaceRoot}/firmware"
             },
-            "group": "build"
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
         },
         {
             "type": "shell",
@@ -52,7 +76,15 @@
             },
             "group": "test",
 
-            "dependsOn": ["CMake: build usb_test"]
+            "dependsOn": ["CMake: build usb_test"],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
         },
 
 

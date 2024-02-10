@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 
-# Pull in SDK (must be before project)
-include(pico_sdk_import.cmake)
+# Including the SDK (must be before project)
+SET(PICO_SDK_PATH "/home/alexander/Projects/oscilloscope-rendering/firmware/lib/pico-sdk")
+SET(PICO_TOOLCHAIN_PATH $PICO_SDK_PATH/cmake/preload/toolchains/)
+
+include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
 
 #include(pico_extras_import_optional.cmake)
 

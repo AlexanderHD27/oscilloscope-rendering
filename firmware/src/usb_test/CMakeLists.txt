@@ -6,10 +6,7 @@ add_executable(usb_test
 
 # pull in common dependencies
 target_link_libraries(usb_test 
-    pico_stdlib 
-    hardware_pio
-    hardware_dma
-    hardware_timer
+    pico_stdlib
 )
 
 # create map/bin/hex file etc.
