@@ -1,6 +1,10 @@
 {
     "cSpell.words": [
-        "microcontroller"
+        "clkdiv",
+        "dreq",
+        "gpio",
+        "microcontroller",
+        "pindirs"
     ],
     "cmake.sourceDirectory": "/home/alexander/Projects/oscilloscope-rendering/firmware",
     "cmake.buildDirectory": "${workspaceFolder}/firmware/build",
@@ -9,7 +13,9 @@
         "timer.h": "c",
         "stdlib.h": "c",
         "stdio.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "assert.h": "c"
     },
-    
+    "cortex-debug.variableUseNaturalFormat": true,
+    "todo-tree.filtering.ignoreGitSubmodules": true
 }

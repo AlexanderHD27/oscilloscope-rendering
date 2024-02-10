@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.12)
 # Including the SDK (must be before project)
 SET(PICO_SDK_PATH "/home/alexander/Projects/oscilloscope-rendering/firmware/lib/pico-sdk")
 SET(PICO_TOOLCHAIN_PATH $PICO_SDK_PATH/cmake/preload/toolchains/)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "$<1:${CMAKE_BINARY_DIR}/bin>")
 
 include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
 
@@ -31,13 +32,19 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-Wno-maybe-uninitialized)
 endif()
 
-# ================ main =================
+# adding sources files & includes
 add_executable(main
     src/main.c
+    src/dac/gen.c
+    src/dac/driver.c
+)
+
+target_include_directories(main PUBLIC 
+    src/dac
 )
 
 # Adding PIO
-pico_generate_pio_header(main ${CMAKE_CURRENT_LIST_DIR}/src/driver/dac.pio)
+pico_generate_pio_header(main ${CMAKE_CURRENT_LIST_DIR}/src/dac/dac.pio)
 
 # pull in common dependencies
 target_link_libraries(main 

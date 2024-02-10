@@ -1,12 +1,18 @@
-
 project(usb_test)
+
 add_executable(usb_test
     main.c
+    usb_descriptors.c
 )
 
-# pull in common dependencies
+# Add tiny USB config header
+target_include_directories(usb_test PUBLIC PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+
+# pull in dependencies
 target_link_libraries(usb_test 
     pico_stdlib
+    pico_unique_id 
+    tinyusb_device tinyusb_board
 )
 
 # create map/bin/hex file etc.
