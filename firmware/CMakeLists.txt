@@ -28,13 +28,13 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-Wno-maybe-uninitialized)
 endif()
 
+# ================ main =================
 add_executable(main
     src/main.c
 )
 
 # Adding PIO
 pico_generate_pio_header(main ${CMAKE_CURRENT_LIST_DIR}/src/driver/dac.pio)
-
 
 # pull in common dependencies
 target_link_libraries(main 
@@ -49,3 +49,5 @@ pico_add_extra_outputs(main)
 
 # add url via pico_set_program_url
 example_auto_set_url(main)
+
+add_subdirectory(src/usb_test usb_test)

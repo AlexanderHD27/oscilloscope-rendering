@@ -15,7 +15,7 @@
         },
         {
             "type": "shell",
-            "label": "Pico: flash",
+            "label": "Pico: flash main",
             "command": [
                 "scripts/flash.exp",
                 "main.elf"
@@ -27,6 +27,35 @@
 
             "dependsOn": ["CMake: build main"]
         },
+
+        {
+            "type": "cmake",
+            "label": "CMake: build usb_test",
+            "command": "build",
+            "targets": [
+                "usb_test"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}/firmware"
+            },
+            "group": "build"
+        },
+        {
+            "type": "shell",
+            "label": "Pico: flash usb_test",
+            "command": [
+                "scripts/flash.exp",
+                "usb_test.elf"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}/firmware"
+            },
+            "group": "test",
+
+            "dependsOn": ["CMake: build usb_test"]
+        },
+
+
         {
             "type": "shell",
             "label": "Pico: launch openocd",
