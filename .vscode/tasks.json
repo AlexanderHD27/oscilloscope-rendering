@@ -26,7 +26,7 @@
             "label": "Pico: flash main",
             "command": [
                 "scripts/flash.exp",
-                "${workspaceRoot}/firmware/build/main.elf"
+                "${workspaceRoot}/firmware/build/bin/main.elf"
             ],
             "options": {
                 "cwd": "${workspaceRoot}/firmware"
@@ -69,7 +69,7 @@
             "label": "Pico: flash usb_test",
             "command": [
                 "scripts/flash.exp",
-                "${workspaceRoot}/firmware/build/usb_test/usb_test.elf"
+                "${workspaceRoot}/firmware/build/bin/usb_test.elf"
             ],
             "options": {
                 "cwd": "${workspaceRoot}/firmware"
@@ -98,6 +98,21 @@
                 "cwd": "${workspaceRoot}/firmware"
             },
             "isBackground": true
-        }
+        },
+        {
+            "type": "cmake",
+            "label": "CMake: Clean",
+            "command": "clean"
+        },
+        {
+            "type": "cmake",
+            "label": "CMake: Clean Rebuild",
+            "command": "cleanRebuild"
+        },
+        {
+            "type": "cmake",
+            "label": "CMake: Configure",
+            "command": "configure"
+        },
     ]
 }

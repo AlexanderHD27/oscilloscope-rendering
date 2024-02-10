@@ -3,7 +3,8 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/firmware/lib/pico-sdk/lib/tinyusb/src"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

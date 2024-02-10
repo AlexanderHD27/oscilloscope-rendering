@@ -6,7 +6,10 @@
     "cmake.buildDirectory": "${workspaceFolder}/firmware/build",
     "cmake.configureOnOpen": true,
     "files.associations": {
-        "timer.h": "c"
+        "timer.h": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "string.h": "c"
     },
     
 }
