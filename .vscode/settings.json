@@ -3,5 +3,10 @@
         "microcontroller"
     ],
     "cmake.sourceDirectory": "/home/alexander/Projects/oscilloscope-rendering/firmware",
-    "cmake.configureOnOpen": true
+    "cmake.buildDirectory": "${workspaceFolder}/firmware/build",
+    "cmake.configureOnOpen": true,
+    "files.associations": {
+        "timer.h": "c"
+    },
+    
 }
