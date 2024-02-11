@@ -51,7 +51,7 @@ void gen_calibration_cross(__uint16_t * buffer, size_t buffer_size) {
 */
 void gen_sins(__uint16_t * buffer, size_t buffer_size, 
     float freq_x, float freq_y, 
-    uint16_t phase_x, uint16_t phase_y,
+    float phase_x, float phase_y, 
     float amp_x, float y_amp
 ) {
     // TODO: Implement gen_sins()
@@ -63,25 +63,80 @@ void gen_sins(__uint16_t * buffer, size_t buffer_size,
  * @param buffer_size sample size of your buffer
 */
 void gen_chirp(__uint16_t * buffer, size_t buffer_size) {
-    // TODO: Implement gen_chirp()
+    float steps = UINT16_MAX / buffer_size;
+    uint16_t x = 0;
+
+    for(size_t i=0; i<buffer_size; i++) {
+        x = (uint16_t)(steps*i);
+        buffer[i*2] = x;
+        buffer[i*2 + 1] = x; 
+    }
 }
 
 /**
- * Generates a rectangle from (x0, y0) to (x1, y1)
+ * Generates a rectangle from (x0, y0) to (x1, y1). Uses the whole buff_size for generation
  * @param buffer the target, that the signal is written two (note that the buffer needs at least size of 2*buffer_size)
  * @param buffer_size sample size of your buffer
 */
 void gen_rect(__uint16_t * buffer, size_t buffer_size,
     uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1
 ) {
-    // TODO: Implement gen_rect()
+    // 4/5 Line, 1/5 Point
+    const size_t segment_duration = buffer_size/4;
+    const size_t point_duration = 1*(segment_duration/5);
+    const size_t line_duration =  segment_duration - point_duration;
+
+    const size_t chunk_remainder = buffer_size - segment_duration*4;
+    const float stepX = (x1 - x0) / line_duration;
+    const float stepY = (y1 - y0) / line_duration;
+
+    // Lines
+    for(size_t i=0; i<line_duration; i++) {
+        // x0, y0 -> x1, y0
+        buffer[(point_duration*1 + line_duration*0 + i)*2    ] = x0 + stepX*i;
+        buffer[(point_duration*1 + line_duration*0 + i)*2 + 1] = y0; 
+        // x1, y0 -> x1, y1
+        buffer[(point_duration*2 + line_duration*1 + i)*2    ] = x1;
+        buffer[(point_duration*2 + line_duration*1 + i)*2 + 1] = y0 + stepY*i; 
+        // x1, y1 -> x0, y1
+        buffer[(point_duration*3 + line_duration*2 + i)*2    ] = x1 - stepX*i;
+        buffer[(point_duration*3 + line_duration*2 + i)*2 + 1] = y1; 
+        // x0, y1 -> x0, y0
+        buffer[(point_duration*4 + line_duration*3 + i)*2    ] = x0;
+        buffer[(point_duration*4 + line_duration*3 + i)*2 + 1] = y1 - stepY*i; 
+    }
+
+    for(int i=0; i<point_duration; i++) {
+        // x0, y0
+        buffer[(segment_duration*0 + i)*2    ] = x0;
+        buffer[(segment_duration*0 + i)*2 + 1] = y0; 
+        // x1, y0
+        buffer[(segment_duration*1 + i)*2    ] = x1;
+        buffer[(segment_duration*1 + i)*2 + 1] = y0; 
+        // x1, y1
+        buffer[(segment_duration*2 + i)*2    ] = x1;
+        buffer[(segment_duration*2 + i)*2 + 1] = y1; 
+        // x0, y1
+        buffer[(segment_duration*3 + i)*2    ] = x0;
+        buffer[(segment_duration*3 + i)*2 + 1] = y1; 
+    }
+
+    for(int i=0; i<chunk_remainder; i++) {
+        buffer[(segment_duration*4 + i) * 2] = x0;
+        buffer[(segment_duration*4 + i) * 2] = x1;
+    }
 }
 
 /**
- * Generates a square at maximum frequency
+ * Generates a two square at maximum frequency (the y channel is inverted)
  * @param buffer the target, that the signal is written two (note that the buffer needs at least size of 2*buffer_size)
  * @param buffer_size sample size of your buffer
 */
 void gen_square_wave(__uint16_t * buffer, size_t buffer_size) {
-    // TODO: Implement gen_square_wave()
+    uint16_t x;
+    for(size_t i=0; i<buffer_size; i++) {
+        x = 0xffff * (i & 0b1);
+        buffer[i*2] = x;
+        buffer[i*2 + 1] = x ^ 0xffff; 
+    }
 }

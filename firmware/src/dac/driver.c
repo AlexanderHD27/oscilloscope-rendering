@@ -11,10 +11,10 @@
 int dma_chan;
 uint16_t (* out_buffer_a)[];
 uint16_t (* out_buffer_b)[];
-enum BUF_SEL buffer_in_use;
+BUF_SEL buffer_in_use;
 size_t buf_size;
 
-void (*__next_frame_handler)(enum BUF_SEL) = NULL;
+void (*__next_frame_handler)(BUF_SEL) = NULL;
 
 /**
  * Called every time a frame is finished
@@ -63,7 +63,7 @@ void __isr_dma() {
 void init_dac_driver(PIO pio, uint sm, 
     uint data_pin_start, uint control_pin_start, 
     uint16_t (*buffer_a)[], uint16_t (*buffer_b)[], size_t buffer_size,
-    void (*next_frame_handler )(enum BUF_SEL)
+    void (*next_frame_handler )(BUF_SEL)
 ) {
     __next_frame_handler = next_frame_handler;
     out_buffer_a = buffer_a;
@@ -79,7 +79,7 @@ void init_dac_driver(PIO pio, uint sm,
         // Clock Div
         // Frequency can be from 2000 Hz to 133 MHz 
         // 20MHz Frequency / 20 cycles per sample =  1 MSamples per Second
-        const float freq = 2 * 1000000;
+        const float freq = 20 * 1000000;
         const float clock_divider = ((float)(SYS_CLK_KHZ * 1000) / (freq))/2;
         sm_config_set_clkdiv(&pio_config, clock_divider);
 

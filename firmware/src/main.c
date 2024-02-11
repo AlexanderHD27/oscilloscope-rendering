@@ -19,16 +19,28 @@
 #define LED_YELLOW 16
 
 #define BUFFER_SIZE 0x1000
-static uint16_t output_buffer [BUFFER_SIZE*2];
-volatile const uint16_t (* output_buffer_ptr)[] = &output_buffer;
+static uint16_t output_buffer_a [BUFFER_SIZE*2];
+static uint16_t output_buffer_b [BUFFER_SIZE*2];
 
-void handle_next_frame(enum BUF_SEL empty_buf) {
+volatile const uint16_t (* output_buffer_a_ptr)[] = &output_buffer_a;
+volatile const uint16_t (* output_buffer_b_ptr)[] = &output_buffer_a;
 
+void handle_next_frame(BUF_SEL empty_buf) {
+    if(empty_buf == A) {
+
+    } else if(empty_buf == B) {
+
+    }
 }
 
 int main() {
 
-    gen_calibration_cross(output_buffer, BUFFER_SIZE);
+    gen_square_wave(output_buffer_a, BUFFER_SIZE);
+
+    gen_rect(output_buffer_b, BUFFER_SIZE, 
+        CONV_NORMAL_TO_UINT16(-0.25), CONV_NORMAL_TO_UINT16(-0.25), 
+        CONV_NORMAL_TO_UINT16(+1.00), CONV_NORMAL_TO_UINT16(+1.00)
+    );
 
     const uint32_t gpio_out_mask = (1 << LED) | (1 << LED_GREEN) | (1 << LED_YELLOW);
     gpio_init_mask(gpio_out_mask);
@@ -38,7 +50,7 @@ int main() {
     uint sm = pio_claim_unused_sm(pio, true);
     init_dac_driver(pio, sm,
         DATA_PIN_START, CTRL_PIN_START,
-        output_buffer_ptr, output_buffer_ptr, BUFFER_SIZE,
+        output_buffer_a_ptr, output_buffer_b_ptr, BUFFER_SIZE,
         handle_next_frame
     );
 
