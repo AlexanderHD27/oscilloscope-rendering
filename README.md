@@ -35,4 +35,16 @@ Everything is solder onto pref-boards an connected via pin-headers and jumpers
 For testing the optics I did use a Hameg MH 312 Oscilloscope (I got this one used from Kleinanzeigen, so its already falling apart: semi-broken Coupling-switch, not being able focus the beam correctly, X-Pos know falling off all the time)
 
 
+## TODOs
+- [ ] Implement Sin Generator
+- [ ] Analog Frontend
+- [ ] EEPROM connection for temp storage
+- [ ] Ring Buffer for Rendering on the PICO
+- [ ] USB-Raw Interface
+- [ ] USB-Compressed Interfaces (Line, Points, Spline, Sin)
+- [ ] Rendering 
+  - [ ] 3D-Cube  
+  - [ ] Terminal
+  - [ ] Bad Apple?
+
 
