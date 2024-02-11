@@ -10,8 +10,10 @@ This is done by setting the scope to XY-Mode and then controlling the X/Y-deflec
 This Project is my shot at this. I use custom hardware (build on perf-board) to archive this goal. I have build
 a 2-Channel 16bit DAC with an refresh rate of around 1 MSample per second. Further more a positioning-cross was implemented
 
-![Position-Cross](./docs/position-corss.jpeg)
-
+<p float="left">
+  <img src="./docs/position-corss.jpeg" width="500">
+  <img src="./docs/squares.jpeg" width="500">
+</p>
 
 ### Hardware
 ![System Diagram Hardware](./docs/HardwareSystemDiagram.svg)
