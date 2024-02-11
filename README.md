@@ -12,8 +12,10 @@ a 2-Channel 16bit DAC with an refresh rate of around 1 MSample per second.
 
 Further more a simple rendering task like a positioning-cross and rectangles are implemented
 
-![Position-Cross](./docs/position-corss.jpeg)
-
+<p float="left">
+  <img src="./docs/position-corss.jpeg" width="500">
+  <img src="./docs/squares.jpeg" width="500">
+</p>
 
 ### Hardware
 ![System Diagram Hardware](./docs/HardwareSystemDiagram.svg)
