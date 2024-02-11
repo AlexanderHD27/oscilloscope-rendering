@@ -9,7 +9,7 @@
  * @param buffer target buffer, that the signal is written to (note that the buffer needs at least size of 2*buffer_size)
  * @param buffer_size how big is your buffer
 */
-void gen_calibration_cross(__uint16_t * buffer, size_t buffer_size) {
+void pregen_calibration_cross(__uint16_t * buffer, size_t buffer_size) {
     uint16_t y0 = 0;
     uint16_t y1 = 0;
     volatile int x_sec = 0;
@@ -62,7 +62,7 @@ void gen_sins(__uint16_t * buffer, size_t buffer_size,
  * @param buffer target buffer, that the signal is written to (note that the buffer needs at least size of 2*buffer_size)
  * @param buffer_size sample size of your buffer
 */
-void gen_chirp(__uint16_t * buffer, size_t buffer_size) {
+void pregen_chirp(__uint16_t * buffer, size_t buffer_size) {
     float steps = UINT16_MAX / buffer_size;
     uint16_t x = 0;
 
@@ -78,7 +78,7 @@ void gen_chirp(__uint16_t * buffer, size_t buffer_size) {
  * @param buffer the target, that the signal is written two (note that the buffer needs at least size of 2*buffer_size)
  * @param buffer_size sample size of your buffer
 */
-void gen_rect(__uint16_t * buffer, size_t buffer_size,
+void pregen_rect(__uint16_t * buffer, size_t buffer_size,
     uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1
 ) {
     // 4/5 Line, 1/5 Point
@@ -132,7 +132,7 @@ void gen_rect(__uint16_t * buffer, size_t buffer_size,
  * @param buffer the target, that the signal is written two (note that the buffer needs at least size of 2*buffer_size)
  * @param buffer_size sample size of your buffer
 */
-void gen_square_wave(__uint16_t * buffer, size_t buffer_size) {
+void pregen_square_wave(__uint16_t * buffer, size_t buffer_size) {
     uint16_t x;
     for(size_t i=0; i<buffer_size; i++) {
         x = 0xffff * (i & 0b1);

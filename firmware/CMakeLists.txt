@@ -37,10 +37,13 @@ add_executable(main
     src/main.c
     src/dac/gen.c
     src/dac/driver.c
+    src/gen/generators.c
+    src/gen/job_mangment.c
 )
 
 target_include_directories(main PUBLIC 
     src/dac
+    src/gen
 )
 
 # Adding PIO
@@ -49,6 +52,7 @@ pico_generate_pio_header(main ${CMAKE_CURRENT_LIST_DIR}/src/dac/dac.pio)
 # pull in common dependencies
 target_link_libraries(main 
     pico_stdlib 
+    pico_multicore
     hardware_pio
     hardware_dma
     hardware_timer

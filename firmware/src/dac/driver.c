@@ -79,7 +79,7 @@ void init_dac_driver(PIO pio, uint sm,
         // Clock Div
         // Frequency can be from 2000 Hz to 133 MHz 
         // 20MHz Frequency / 20 cycles per sample =  1 MSamples per Second
-        const float freq = 20 * 1000000;
+        const float freq = 1 * 1000000;
         const float clock_divider = ((float)(SYS_CLK_KHZ * 1000) / (freq))/2;
         sm_config_set_clkdiv(&pio_config, clock_divider);
 

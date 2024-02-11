@@ -25,10 +25,10 @@ void init_dac_driver(
 
 // Util function for generating some common wave forms
 
-void gen_calibration_cross(__uint16_t * buffer, size_t buffer_size);
+void pregen_calibration_cross(__uint16_t * buffer, size_t buffer_size);
 void gen_sins(__uint16_t * buffer, size_t buffer_size, float freq_x, float freq_y, float phase_x, float phase_y, float amp_x, float y_amp);
-void gen_chirp(__uint16_t * buffer, size_t buffer_size);
-void gen_rect(__uint16_t * buffer, size_t buffer_size, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
-void gen_square_wave(__uint16_t * buffer, size_t buffer_size);
+void pregen_chirp(__uint16_t * buffer, size_t buffer_size);
+void pregen_rect(__uint16_t * buffer, size_t buffer_size, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
+void pregen_square_wave(__uint16_t * buffer, size_t buffer_size);
 
 #endif

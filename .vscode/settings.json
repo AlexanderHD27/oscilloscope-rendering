@@ -1,10 +1,42 @@
 {
     "cSpell.words": [
+        "apcsw",
+        "apreg",
+        "apsel",
+        "arrayname",
+        "baseaddr",
+        "bitwidth",
+        "cget",
+        "channellist",
+        "charmsg",
         "clkdiv",
+        "cpnum",
+        "deassert",
+        "deasserted",
+        "deasserting",
+        "dpreg",
         "dreq",
+        "eventlist",
         "gpio",
+        "helptext",
+        "jtag",
+        "lindex",
+        "memaccess",
         "microcontroller",
-        "pindirs"
+        "multicore",
+        "pindirs",
+        "pregen",
+        "resexit",
+        "semihosting",
+        "srst",
+        "targetname",
+        "TPIU",
+        "trst",
+        "virt",
+        "waitstate",
+        "watchpoint",
+        "watchpoints",
+        "wready"
     ],
     "cmake.sourceDirectory": "/home/alexander/Projects/oscilloscope-rendering/firmware",
     "cmake.buildDirectory": "${workspaceFolder}/firmware/build",
@@ -14,8 +46,11 @@
         "stdlib.h": "c",
         "stdio.h": "c",
         "string.h": "c",
-        "assert.h": "c"
+        "assert.h": "c",
+        "gen.h": "c",
+        "multicore.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": true,
-    "todo-tree.filtering.ignoreGitSubmodules": true
+    "todo-tree.filtering.ignoreGitSubmodules": true,
+    "todo-tree.tree.showBadges": true
 }

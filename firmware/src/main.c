@@ -3,6 +3,7 @@
 
 #include "hardware/pio.h"
 #include "dac.h"
+#include "gen.h"
 
 #define DATA_PIN_START 2
 #define CTRL_PIN_START 10
@@ -22,22 +23,20 @@
 static uint16_t output_buffer_a [BUFFER_SIZE*2];
 static uint16_t output_buffer_b [BUFFER_SIZE*2];
 
-volatile const uint16_t (* output_buffer_a_ptr)[] = &output_buffer_a;
-volatile const uint16_t (* output_buffer_b_ptr)[] = &output_buffer_a;
+uint16_t (* output_buffer_a_ptr)[] = &output_buffer_a;
+uint16_t (* output_buffer_b_ptr)[] = &output_buffer_a;
 
-void handle_next_frame(BUF_SEL empty_buf) {
-    if(empty_buf == A) {
-
-    } else if(empty_buf == B) {
-
-    }
-}
 
 int main() {
 
-    gen_square_wave(output_buffer_a, BUFFER_SIZE);
+    //pregen_square_wave(output_buffer_a, BUFFER_SIZE);
 
-    gen_rect(output_buffer_b, BUFFER_SIZE, 
+    pregen_rect(output_buffer_a, BUFFER_SIZE, 
+        CONV_NORMAL_TO_UINT16(-1.00), CONV_NORMAL_TO_UINT16(-1.00),
+        CONV_NORMAL_TO_UINT16(+0.25), CONV_NORMAL_TO_UINT16(+0.25) 
+    );
+
+    pregen_rect(output_buffer_b, BUFFER_SIZE, 
         CONV_NORMAL_TO_UINT16(-0.25), CONV_NORMAL_TO_UINT16(-0.25), 
         CONV_NORMAL_TO_UINT16(+1.00), CONV_NORMAL_TO_UINT16(+1.00)
     );
@@ -46,13 +45,18 @@ int main() {
     gpio_init_mask(gpio_out_mask);
     gpio_set_dir_masked(gpio_out_mask, gpio_out_mask);
 
-    PIO pio = pio0;
-    uint sm = pio_claim_unused_sm(pio, true);
-    init_dac_driver(pio, sm,
-        DATA_PIN_START, CTRL_PIN_START,
-        output_buffer_a_ptr, output_buffer_b_ptr, BUFFER_SIZE,
-        handle_next_frame
-    );
+    gen_init();
+
+    //PIO pio = pio0;
+    //uint sm = pio_claim_unused_sm(pio, true);
+    //init_dac_driver(pio, sm,
+    //    DATA_PIN_START, CTRL_PIN_START,
+    //    output_buffer_a_ptr, output_buffer_b_ptr, BUFFER_SIZE,
+    //    handle_next_frame
+    //);
+
+    generation_job test_job;
+    test_job.buffer = output_buffer_a_ptr;
 
     while (true) {
         gpio_put(LED, false);
