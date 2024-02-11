@@ -8,7 +8,7 @@ Drawing on analog oscilloscope is almost a classic in the electronics/microcontr
 This is done by setting the scope to XY-Mode and then controlling the X/Y-deflection of the electron-beam.
 
 This Project is my shot at this. I use custom hardware (build on perf-board) to archive this goal. I have build
-a 2-Channel 16bit DAC with an refresh rate of around 1 MSample per second.
+a 2-Channel 16bit DAC with an refresh rate of around 1 MSample per second. Further more a positioning-cross was implemented
 
 Further more a simple rendering task like a positioning-cross and rectangles are implemented
 
