@@ -3,18 +3,20 @@
 #include "hardware/dma.h"
 #include "hardware/timer.h"
 
+#include "FreeRTOS.h"
+#include "FreeRTOSConfig.h"
+#include "queue.h"
+
 #include "dac.pio.h"
 #include "dac.h"
 
-#include "dac.h"
+#include "include_globals.h"
 
 int dma_chan;
-uint16_t (* out_buffer_a)[];
-uint16_t (* out_buffer_b)[];
-BUF_SEL buffer_in_use;
-size_t buf_size;
 
-void (*__next_frame_handler)(BUF_SEL) = NULL;
+// Output Buffer should never be touched besides the ISR
+frame_data_buffer current_output_buffer; 
+frame_data_buffer next_output_buffer;
 
 /**
  * Called every time a frame is finished
@@ -22,13 +24,26 @@ void (*__next_frame_handler)(BUF_SEL) = NULL;
  * This should be set as isr for dma
 */ 
 void __isr_dma() {
+    BaseType_t xTaskWokenByReceive = pdFALSE;
+    frame_data_buffer new_buff;
+
+    frame_data_buffer old_output_buffer = current_output_buffer; 
+    current_output_buffer = next_output_buffer;
+
+    if(xQueueReceiveFromISR(data_buf_queue, &new_buff, &xTaskWokenByReceive)) {
+        // Got new buffer! -> new buffer will be the next buffer
+        next_output_buffer = new_buff;
+    }
+
+    // Refuel the DMA with the new buffer
     dma_channel_acknowledge_irq0(dma_chan);
-    dma_channel_transfer_from_buffer_now(dma_chan, *(buffer_in_use == A ? out_buffer_b : out_buffer_a), buf_size);
+    dma_channel_transfer_from_buffer_now(dma_chan, *(current_output_buffer.buffer), current_output_buffer.buf_size);
 
-    if(__next_frame_handler)
-        __next_frame_handler(buffer_in_use);
-
-    buffer_in_use = buffer_in_use == A ? B : A;
+    // If current and buffer are not the same (-> we did not repeat twice) we let go of it
+    if(current_output_buffer.buffer != old_output_buffer.buffer) {
+        // This call should never be blocked
+        while(!xQueueSendFromISR(unused_data_buf_queue, &old_output_buffer, &xTaskWokenByReceive));
+    }
 }
 
 /**
@@ -60,16 +75,15 @@ void __isr_dma() {
  * @param buffer_size who many X-Y points are contained in a frame
  * @param next_frame_handler Handler function, called after a frame swap occurred. Its parsed the used buffer, to modify/fill. This function should talk only short amount of time to execute
 */
-void init_dac_driver(PIO pio, uint sm, 
-    uint data_pin_start, uint control_pin_start, 
-    uint16_t (*buffer_a)[], uint16_t (*buffer_b)[], size_t buffer_size,
-    void (*next_frame_handler )(BUF_SEL)
-) {
-    __next_frame_handler = next_frame_handler;
-    out_buffer_a = buffer_a;
-    out_buffer_b = buffer_b;
-    buf_size = buffer_size;
-    buffer_in_use = A;
+void __init_dac_driver(PIO pio, uint sm, uint data_pin_start, uint control_pin_start) {
+    // Get initial buffers
+    {
+        frame_data_buffer first_buf;
+        first_buf.buf_size = BUFFER_SIZE;
+        first_buf.buffer = &main_frame_buffers[0];
+        current_output_buffer = first_buf;
+        next_output_buffer = first_buf;
+    }
 
     // Configure PIOs
     {
@@ -114,7 +128,7 @@ void init_dac_driver(PIO pio, uint sm,
         dma_channel_configure(
             dma_chan, &dma_config,
             &pio->txf[sm], 
-            (void*)(*out_buffer_a), buffer_size, true
+            &main_frame_buffers[0], sizeof(main_frame_buffers[0])/2, true
         );
 
         irq_set_exclusive_handler(DMA_IRQ_0, __isr_dma);

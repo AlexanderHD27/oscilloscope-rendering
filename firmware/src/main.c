@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "FreeRTOS.h"
+#include "FreeRTOSConfig.h"
+
 #include "hardware/pio.h"
 #include "dac.h"
-#include "gen.h"
 
 #define DATA_PIN_START 2
 #define CTRL_PIN_START 10
@@ -19,13 +21,11 @@
 #define LED_GREEN 17
 #define LED_YELLOW 16
 
-#define BUFFER_SIZE 0x1000
 static uint16_t output_buffer_a [BUFFER_SIZE*2];
 static uint16_t output_buffer_b [BUFFER_SIZE*2];
 
 uint16_t (* output_buffer_a_ptr)[] = &output_buffer_a;
 uint16_t (* output_buffer_b_ptr)[] = &output_buffer_a;
-
 
 int main() {
 
@@ -45,23 +45,11 @@ int main() {
     gpio_init_mask(gpio_out_mask);
     gpio_set_dir_masked(gpio_out_mask, gpio_out_mask);
 
-    gen_init();
+    PIO pio = pio0;
+    uint sm = pio_claim_unused_sm(pio, true);
+    init_dac(pio, sm,
+        DATA_PIN_START, CTRL_PIN_START
+    );
 
-    //PIO pio = pio0;
-    //uint sm = pio_claim_unused_sm(pio, true);
-    //init_dac_driver(pio, sm,
-    //    DATA_PIN_START, CTRL_PIN_START,
-    //    output_buffer_a_ptr, output_buffer_b_ptr, BUFFER_SIZE,
-    //    handle_next_frame
-    //);
-
-    generation_job test_job;
-    test_job.buffer = output_buffer_a_ptr;
-
-    while (true) {
-        gpio_put(LED, false);
-        sleep_ms(100);
-        gpio_put(LED, true);
-        sleep_ms(100);
-    }
+    vTaskStartScheduler();
 }

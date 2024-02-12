@@ -10,20 +10,48 @@
 
 #define PI 3.14159265359
 
-// Driver Stuff
-typedef enum {
-    A, B
-} BUF_SEL;
+// Data Types for Buffer-flow
 
-void init_dac_driver(
-    PIO pio, uint sm, uint data_pin_start, 
-    uint control_pin_start, 
-    uint16_t (*buffer_a)[], uint16_t (*buffer_b)[], size_t buffer_size,
-    void (*handle_next_frame )(BUF_SEL)
-);
+#define BUFFER_SIZE 0x1000
+#define GENERAL_QUEUE_SIZE 4
+#define INSTRUCTION_BUF_SIZE 128
 
+typedef uint16_t (* buffer_pointer_t)[];
 
-// Util function for generating some common wave forms
+typedef struct {
+    buffer_pointer_t buffer;
+    size_t buf_size;
+} frame_data_buffer;
+
+typedef struct {
+    frame_data_buffer buf;
+    void * ins_buf;
+    size_t ins_buf_size;
+} job;
+
+// Main Init function
+void init_dac(PIO pio, uint sm, uint data_pin_start, uint control_pin_start);
+void __init_dac_driver(PIO pio, uint sm, uint data_pin_start, uint control_pin_start);
+
+// Tasks
+void in_task_function(void * param);
+void processing_job_task_function(void * param);
+
+void process_job(job * j);
+
+/**
+ * Submits a new instruction list to the dac. This function should be use by the IO interface (e.g. USB) to submit an instruction list
+ * @param instructions_list pointer to the instruction array. Should be pointer acquired from get_instruction_buf()
+ * @param instructions_list_size size of the instruction list (how many bytes are used for instruction, not size of the instruction_list -> instruction_list_size < sizeof(instruction_list))
+*/
+void submit_instructions(void * instructions_list, size_t instructions_list_size);
+
+/**
+ * acquires a buffer for instructions to be written to. The size of the instruction list terminated by INSTRUCTION_BUF_SIZE in bytes 
+*/
+void * acquire_instruction_buf();
+
+// Util function for pre-generating some common wave forms
 
 void pregen_calibration_cross(__uint16_t * buffer, size_t buffer_size);
 void gen_sins(__uint16_t * buffer, size_t buffer_size, float freq_x, float freq_y, float phase_x, float phase_y, float amp_x, float y_amp);
