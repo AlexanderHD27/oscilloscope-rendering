@@ -49,7 +49,10 @@ void __isr_dma() {
         if(xQueueReceiveFromISR(frame_buffer_queue, &frame_buffer, &xTaskWokenByReceive)) {
             // Got new buffer! -> recv buffer will be the next buffer
             next_output_buffer = frame_buffer;
-        } // If not: repeat the old buffer
+        } else {
+            // buffer miss: repeat the old buffer and check next cycle
+            repeat_counter = FRAME_REPEAT-1;
+        }
     } else {
         dma_channel_acknowledge_irq0(dma_chan);
         dma_channel_transfer_from_buffer_now(dma_chan, *(current_output_buffer.buffer), current_output_buffer.size);

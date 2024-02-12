@@ -16,4 +16,4 @@
 #define PIO_FREQ_KHZ 20000
 
 // Every frame sent to the PIO cores is repeated FRAME_REPEAT times
-#define FRAME_REPEAT 32
+#define FRAME_REPEAT 8
