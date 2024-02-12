@@ -35,15 +35,24 @@ endif()
 # adding sources files & includes
 add_executable(main
     src/main.c
+
+    src/dac/pregen.c
     src/dac/gen.c
     src/dac/driver.c
-    src/gen/generators.c
-    src/gen/job_mangment.c
+    src/dac/interface.c
+    src/dac/globals.c
 )
 
 target_include_directories(main PUBLIC 
     src/dac
     src/gen
+)
+
+# Add FreeRTOS
+include(freeRTOS.cmake)
+
+target_include_directories(FreeRTOS PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}
 )
 
 # Adding PIO
@@ -56,6 +65,7 @@ target_link_libraries(main
     hardware_pio
     hardware_dma
     hardware_timer
+    FreeRTOS
 )
 
 # create map/bin/hex file etc.
@@ -64,4 +74,5 @@ pico_add_extra_outputs(main)
 # add url via pico_set_program_url
 example_auto_set_url(main)
 
-add_subdirectory(src/usb_test)
+add_subdirectory(src/test/usb)
+add_subdirectory(src/test/freeRTOS)
