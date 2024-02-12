@@ -47,9 +47,11 @@ void __isr_dma() {
         frame_buffer_t frame_buffer;
 
         if(xQueueReceiveFromISR(frame_buffer_queue, &frame_buffer, &xTaskWokenByReceive)) {
+            gpio_put(16, false);
             // Got new buffer! -> recv buffer will be the next buffer
             next_output_buffer = frame_buffer;
         } else {
+            gpio_put(16, true);
             // buffer miss: repeat the old buffer and check next cycle
             repeat_counter = FRAME_REPEAT-1;
         }

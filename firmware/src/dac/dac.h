@@ -18,7 +18,7 @@ typedef struct {
 } frame_buffer_t;
 
 typedef struct {
-    void * buffer;
+    uint8_t * buffer;
     size_t size;
 } instruction_buffer_t;
 
@@ -32,17 +32,45 @@ void processing_job_task_function(void * param);
 
 void process_job(instruction_buffer_t instructions, frame_buffer_t target_frame_buffer);
 
+// Instruction
+
+enum INSTRUCTION_ID {
+    NONE      = 0x0,
+    CONST     = 0x1,
+    LINE      = 0x2,
+    CUBIC     = 0x3,
+    QUADRATIC = 0x4,
+    SINE      = 0x5,
+};
+
+enum INSTRUCTION_SEL_CHANNEL {
+    X = 0x00, 
+    Y = 0x80,
+};
+
+typedef struct  {
+    enum INSTRUCTION_ID id;
+    uint16_t length;
+    uint16_t param[5];
+} __instruction_t;
+
+void execute_instruction(__instruction_t ins, uint16_t * buffer);
+
+size_t add_ins_none(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uint16_t length);
+size_t add_ins_const(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uint16_t length, uint16_t level);
+size_t add_ins_line(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uint16_t length, uint16_t from, uint16_t to);
+
 /**
  * Submits a new instruction list to the dac. This function should be use by the IO interface (e.g. USB) to submit an instruction list
  * @param instructions_list pointer to the instruction array. Should be pointer acquired from get_instruction_buf()
  * @param instructions_list_size size of the instruction list (how many bytes are used for instruction, not size of the instruction_list -> instruction_list_size < sizeof(instruction_list))
 */
-void submit_instructions(void * instructions_list, size_t instructions_list_size);
+void submit_instructions(uint8_t * instructions_list, size_t instructions_list_size);
 
 /**
  * acquires a buffer for instructions to be written to. The size of the instruction list terminated by INSTRUCTION_BUF_SIZE in bytes 
 */
-void * acquire_instruction_buffer_pointer();
+uint8_t * acquire_instruction_buffer_pointer();
 
 // Util function for pre-generating some common wave forms
 void pregen_calibration_cross(__uint16_t * buffer, size_t buffer_size);

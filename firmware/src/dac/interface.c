@@ -11,7 +11,7 @@
 // from globals.c
 extern TaskHandle_t processing_job_task;
 
-void submit_instructions(void * instructions_list, size_t instructions_list_size) {
+void submit_instructions(uint8_t * instructions_list, size_t instructions_list_size) {
     instruction_buffer_t instruction_buffer;
     instruction_buffer.buffer = instructions_list;
     instruction_buffer.size = instructions_list_size;
@@ -20,7 +20,7 @@ void submit_instructions(void * instructions_list, size_t instructions_list_size
 };
 
 
-void * acquire_instruction_buffer_pointer() {
+uint8_t * acquire_instruction_buffer_pointer() {
     instruction_buffer_t instruction_buffer;
     while(!xQueueReceive(unused_instruction_buffer_queue, &instruction_buffer, DEFAULT_QUEUE_WAIT_DURATION));
     return instruction_buffer.buffer;
@@ -42,7 +42,7 @@ void init_fill_queues_task_function(void * param) {
     for(int i=0; i<GENERAL_QUEUE_SIZE-2; i++) {
         instruction_buffer_t new_instruction_buffer;
         new_instruction_buffer.size = 0;
-        new_instruction_buffer.buffer = &main_instruction_buffer[i];
+        new_instruction_buffer.buffer = (uint8_t *)(&main_instruction_buffer[i]);
         while(!xQueueSend(unused_instruction_buffer_queue, &new_instruction_buffer, DEFAULT_QUEUE_WAIT_DURATION));
     }
 
@@ -50,7 +50,7 @@ void init_fill_queues_task_function(void * param) {
 }
 
 void __init_tasks() {
-    xTaskCreate(processing_job_task_function, "Signal Process Task", 512, NULL, 1, &processing_job_task);
+    xTaskCreate(processing_job_task_function, "Signal Process Task", 1024, NULL, 1, &processing_job_task);
 }
 
 void init_dac(PIO pio, uint sm, uint data_pin_start, uint control_pin_start) {

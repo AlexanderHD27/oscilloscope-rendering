@@ -25,8 +25,18 @@
 
 void provide_job_task(void * param) {
     while (true) {
-        void * ins_buff = acquire_instruction_buffer_pointer();
-        submit_instructions(ins_buff, 64);
+        uint8_t * __ins_buf = acquire_instruction_buffer_pointer();
+        uint8_t * ins_buf = __ins_buf;
+
+        ins_buf += add_ins_line(ins_buf, X, BUFFER_SIZE/2, 0xffff, 0x0000);
+        ins_buf += add_ins_line(ins_buf, Y, BUFFER_SIZE/2, 0x0000, 0xffff);
+        ins_buf += add_ins_line(ins_buf, X, BUFFER_SIZE/2, 0x0000, 0xffff);
+        ins_buf += add_ins_line(ins_buf, Y, BUFFER_SIZE/2, 0xffff, 0x0000);
+        
+        //ins_buf += add_ins_const(ins_buf, X, BUFFER_SIZE, 0xffff);
+        //ins_buf += add_ins_const(ins_buf, Y, BUFFER_SIZE, 0xffff);
+
+        submit_instructions(__ins_buf, ins_buf - __ins_buf);
     }
 }
 
@@ -37,6 +47,7 @@ int main() {
     const uint32_t gpio_out_mask = (1 << LED) | (1 << LED_GREEN) | (1 << LED_YELLOW);
     gpio_init_mask(gpio_out_mask);
     gpio_set_dir_masked(gpio_out_mask, gpio_out_mask);
+    gpio_put(16, true);
 
     // Claim PIO & sm
     PIO pio = pio0;
