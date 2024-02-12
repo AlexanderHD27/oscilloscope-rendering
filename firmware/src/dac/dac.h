@@ -4,32 +4,23 @@
 #include "pico/types.h"
 #include "hardware/pio.h"
 
-#define PIO_CLK_DIV(freq) (SYS_CLK_MHZ*1000000)/(freq)
+#include "dacConfig.h"
 
 #define CONV_NORMAL_TO_UINT16(x) (uint16_t)( 0xffff*((x+1)/2) )
-
 #define PI 3.14159265359
 
 // Data Types for Buffer-flow
-
-#define BUFFER_SIZE 0x1000
-#define GENERAL_QUEUE_SIZE 4
-#define INSTRUCTION_BUF_SIZE 128
-
-#define TICKS_WAIT_DURATION 32
-
 typedef uint16_t (* buffer_pointer_t)[];
 
 typedef struct {
     buffer_pointer_t buffer;
-    size_t buf_size;
-} frame_data_buffer;
+    size_t size;
+} frame_buffer_t;
 
 typedef struct {
-    frame_data_buffer buf;
-    void * ins_buf;
-    size_t ins_buf_size;
-} job;
+    void * buffer;
+    size_t size;
+} instruction_buffer_t;
 
 // Main Init function
 void init_dac(PIO pio, uint sm, uint data_pin_start, uint control_pin_start);
@@ -39,7 +30,7 @@ void __init_dac_driver(PIO pio, uint sm, uint data_pin_start, uint control_pin_s
 void in_task_function(void * param);
 void processing_job_task_function(void * param);
 
-void process_job(job * j);
+void process_job(instruction_buffer_t instructions, frame_buffer_t target_frame_buffer);
 
 /**
  * Submits a new instruction list to the dac. This function should be use by the IO interface (e.g. USB) to submit an instruction list
@@ -51,7 +42,7 @@ void submit_instructions(void * instructions_list, size_t instructions_list_size
 /**
  * acquires a buffer for instructions to be written to. The size of the instruction list terminated by INSTRUCTION_BUF_SIZE in bytes 
 */
-void * acquire_instruction_buf();
+void * acquire_instruction_buffer_pointer();
 
 // Util function for pre-generating some common wave forms
 void pregen_calibration_cross(__uint16_t * buffer, size_t buffer_size);

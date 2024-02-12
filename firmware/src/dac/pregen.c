@@ -1,8 +1,8 @@
+#include "pico/stdlib.h"
 #include <stdlib.h>
 #include <math.h>
 
 #include "dac.h"
-#include "pico/types.h"
 
 /**
  * Pregenerate a circle + cross + point for calibration/testing. This should not be used for live-generation
@@ -62,7 +62,7 @@ void gen_sins(__uint16_t * buffer, size_t buffer_size,
  * @param buffer target buffer, that the signal is written to (note that the buffer needs at least size of 2*buffer_size)
  * @param buffer_size sample size of your buffer
 */
-void pregen_chirp(__uint16_t * buffer, size_t buffer_size) {
+void pregen_chirp(uint16_t * buffer, size_t buffer_size) {
     float steps = UINT16_MAX / buffer_size;
     uint16_t x = 0;
 

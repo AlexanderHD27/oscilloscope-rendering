@@ -25,7 +25,7 @@
 
 void provide_job_task(void * param) {
     while (true) {
-        void * ins_buff = acquire_instruction_buf();
+        void * ins_buff = acquire_instruction_buffer_pointer();
         submit_instructions(ins_buff, 64);
         vTaskDelay(10);
     }

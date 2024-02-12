@@ -9,36 +9,21 @@
 #include "include_globals.h"
 
 // from globals.c
-extern TaskHandle_t in_task;
 extern TaskHandle_t processing_job_task;
 
-void in_task_function(void * param) {
-    job empty_job;
-    frame_data_buffer unused_data_buf;    
-    
-    while (true) {
-        while(!xQueueReceive(instruction_queue, &empty_job, TICKS_WAIT_DURATION));
-        while(!xQueueReceive(unused_data_buf_queue, &unused_data_buf, TICKS_WAIT_DURATION));
-
-        while (!xQueueSend(job_queue, &empty_job, TICKS_WAIT_DURATION));
-    }
-}
-
 void submit_instructions(void * instructions_list, size_t instructions_list_size) {
-    job new_job;
-    new_job.ins_buf = instructions_list;
-    new_job.ins_buf_size = instructions_list_size;
-
-    while(!xQueueSend(instruction_queue, &new_job, TICKS_WAIT_DURATION));
-
+    instruction_buffer_t instruction_buffer;
+    instruction_buffer.buffer = instructions_list;
+    instruction_buffer.size = instructions_list_size;
     
+    while(!xQueueSend(instruction_buffer_queue, &instruction_buffer, DEFAULT_QUEUE_WAIT_DURATION));
 };
 
 
-void * acquire_instruction_buf() {
-    job old_job;    
-    while(!xQueueReceive(unused_instruction_queue, &old_job, 1));
-    return old_job.ins_buf;
+void * acquire_instruction_buffer_pointer() {
+    instruction_buffer_t instruction_buffer;
+    while(!xQueueReceive(unused_instruction_buffer_queue, &instruction_buffer, DEFAULT_QUEUE_WAIT_DURATION));
+    return instruction_buffer.buffer;
 };
 
 /**
@@ -47,41 +32,32 @@ void * acquire_instruction_buf() {
 TaskHandle_t init_fill_queue_task;
 
 void init_fill_queues_task_function(void * param) {
-    for(int i=0; i<2; i++) {
-        frame_data_buffer new_buf;
-        new_buf.buf_size = BUFFER_SIZE;
-        new_buf.buffer = &main_frame_buffers[i];
-        while(!xQueueSend(data_buf_queue, &new_buf, TICKS_WAIT_DURATION));
+    for(int i=0; i<GENERAL_QUEUE_SIZE; i++) {
+        frame_buffer_t new_frame_buffer;
+        new_frame_buffer.size = BUFFER_SIZE;
+        new_frame_buffer.buffer = &main_frame_buffers[i];
+        while(!xQueueSend(frame_buffer_queue, &new_frame_buffer, DEFAULT_QUEUE_WAIT_DURATION));
     }
 
     for(int i=0; i<GENERAL_QUEUE_SIZE-2; i++) {
-        frame_data_buffer new_buf;
-        new_buf.buf_size = BUFFER_SIZE;
-        new_buf.buffer = &main_frame_buffers[i+2];
-        while(!xQueueSend(unused_data_buf_queue, &new_buf, TICKS_WAIT_DURATION));
-    }
-
-    for(int i=0; i<GENERAL_QUEUE_SIZE; i++) {
-        job new_job;
-        new_job.ins_buf = &main_instruction_buffer[i];
-        new_job.ins_buf_size = INSTRUCTION_BUF_SIZE;
-        while(!xQueueSend(unused_instruction_queue, &new_job, TICKS_WAIT_DURATION));
+        instruction_buffer_t new_instruction_buffer;
+        new_instruction_buffer.size = 0;
+        new_instruction_buffer.buffer = &main_instruction_buffer[i];
+        while(!xQueueSend(unused_instruction_buffer_queue, &new_instruction_buffer, DEFAULT_QUEUE_WAIT_DURATION));
     }
 
     vTaskDelete(NULL);    
 }
 
 void __init_tasks() {
-    xTaskCreate(in_task_function, "In Task", 512, NULL, 1, &in_task);
     xTaskCreate(processing_job_task_function, "Signal Process Task", 512, NULL, 1, &processing_job_task);
 }
 
 void init_dac(PIO pio, uint sm, uint data_pin_start, uint control_pin_start) {
-    unused_instruction_queue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(job));
-    instruction_queue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(job));
-    job_queue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(job));
-    data_buf_queue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(frame_data_buffer));
-    unused_data_buf_queue = xQueueCreate(GENERAL_QUEUE_SIZE+2, sizeof(frame_data_buffer));
+    unused_instruction_buffer_queue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(instruction_buffer_t));
+    instruction_buffer_queue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(instruction_buffer_t));
+    unused_frame_buffer_queue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(frame_buffer_t));
+    frame_buffer_queue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(frame_buffer_t));
 
     xTaskCreate(init_fill_queues_task_function, "Init fill Queues", 64, NULL, 4, &init_fill_queue_task);
 

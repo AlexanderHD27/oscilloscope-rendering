@@ -5,13 +5,11 @@
 
 #include "dac.h"
 
-QueueHandle_t unused_instruction_queue;
-QueueHandle_t instruction_queue;
-QueueHandle_t job_queue;
-QueueHandle_t data_buf_queue;
-QueueHandle_t unused_data_buf_queue;
+QueueHandle_t unused_instruction_buffer_queue;
+QueueHandle_t instruction_buffer_queue;
+QueueHandle_t unused_frame_buffer_queue;
+QueueHandle_t frame_buffer_queue;
 
-TaskHandle_t in_task;
 TaskHandle_t processing_job_task;
 
 uint16_t main_frame_buffers[GENERAL_QUEUE_SIZE][BUFFER_SIZE*2];

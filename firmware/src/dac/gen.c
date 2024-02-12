@@ -9,22 +9,26 @@
  * handles the processing/signal generation part. It should run on core1
 */
 void processing_job_task_function(void * param) {
-    job current_job;
+    instruction_buffer_t new_instruction_buffer;
+    frame_buffer_t new_frame_buffer;
+
     while (true) {
-        // Wait until job is available
-        if(xQueueReceive(job_queue, &current_job, TICKS_WAIT_DURATION)) {
+        // Wait until instruction are available
+        if(xQueueReceive(instruction_buffer_queue, &new_instruction_buffer, DEFAULT_QUEUE_WAIT_DURATION)) {
+
+            // Get valid frame buffer
+            while (!xQueueReceive(unused_frame_buffer_queue, &new_frame_buffer, DEFAULT_QUEUE_WAIT_DURATION));
+            
+
             gpio_put(17, true);
-            process_job(&current_job);
+            process_job(new_instruction_buffer, new_frame_buffer);
             gpio_put(17, false);
 
             // Send resulting buffer to PIO
-            while(!xQueueSend(data_buf_queue, &(current_job.buf), TICKS_WAIT_DURATION)) {}
-        
-            // Send Empty Instruction Buffer to Input
-            current_job.buf.buf_size = 0;
-            current_job.buf.buffer = NULL;
+            while(!xQueueSend(frame_buffer_queue, &new_frame_buffer, DEFAULT_QUEUE_WAIT_DURATION)) {}
 
-            while(!xQueueSend(unused_instruction_queue, &(current_job), TICKS_WAIT_DURATION)) {}
+            // Returning Instruction buffer
+            while(!xQueueSend(unused_instruction_buffer_queue, &new_instruction_buffer, DEFAULT_QUEUE_WAIT_DURATION)) {}
         }
     }
 }
@@ -33,6 +37,6 @@ void processing_job_task_function(void * param) {
  * Process on job
  * TODO: Implement signal generation function
 */
-void process_job(job * j) {
-    sleep_ms(1);  
+void process_job(instruction_buffer_t instructions, frame_buffer_t target_frame_buffer) {
+    pregen_chirp(target_frame_buffer.buffer, target_frame_buffer.size);
 }
