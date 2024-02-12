@@ -16,6 +16,8 @@
 #define GENERAL_QUEUE_SIZE 4
 #define INSTRUCTION_BUF_SIZE 128
 
+#define TICKS_WAIT_DURATION 32
+
 typedef uint16_t (* buffer_pointer_t)[];
 
 typedef struct {
@@ -52,7 +54,6 @@ void submit_instructions(void * instructions_list, size_t instructions_list_size
 void * acquire_instruction_buf();
 
 // Util function for pre-generating some common wave forms
-
 void pregen_calibration_cross(__uint16_t * buffer, size_t buffer_size);
 void gen_sins(__uint16_t * buffer, size_t buffer_size, float freq_x, float freq_y, float phase_x, float phase_y, float amp_x, float y_amp);
 void pregen_chirp(__uint16_t * buffer, size_t buffer_size);

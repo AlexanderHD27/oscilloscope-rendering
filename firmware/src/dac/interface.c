@@ -17,10 +17,10 @@ void in_task_function(void * param) {
     frame_data_buffer unused_data_buf;    
     
     while (true) {
-        while(!xQueueReceive(instruction_queue, &empty_job, 1)) {}
-        while(!xQueueReceive(unused_data_buf_queue, &unused_data_buf, 1)) {}
+        while(!xQueueReceive(instruction_queue, &empty_job, TICKS_WAIT_DURATION));
+        while(!xQueueReceive(unused_data_buf_queue, &unused_data_buf, TICKS_WAIT_DURATION));
 
-        while (!xQueueSend(job_queue, &empty_job, 1)) {}
+        while (!xQueueSend(job_queue, &empty_job, TICKS_WAIT_DURATION));
     }
 }
 
@@ -29,13 +29,15 @@ void submit_instructions(void * instructions_list, size_t instructions_list_size
     new_job.ins_buf = instructions_list;
     new_job.ins_buf_size = instructions_list_size;
 
-    while(!xQueueSend(instruction_queue, &new_job, 1)) {};
+    while(!xQueueSend(instruction_queue, &new_job, TICKS_WAIT_DURATION));
+
+    
 };
 
 
 void * acquire_instruction_buf() {
     job old_job;    
-    while(!xQueueReceive(instruction_queue, &old_job, 1)) {};
+    while(!xQueueReceive(unused_instruction_queue, &old_job, 1));
     return old_job.ins_buf;
 };
 
@@ -49,21 +51,21 @@ void init_fill_queues_task_function(void * param) {
         frame_data_buffer new_buf;
         new_buf.buf_size = BUFFER_SIZE;
         new_buf.buffer = &main_frame_buffers[i];
-        while(!xQueueSend(data_buf_queue, &new_buf, 1));
+        while(!xQueueSend(data_buf_queue, &new_buf, TICKS_WAIT_DURATION));
     }
 
     for(int i=0; i<GENERAL_QUEUE_SIZE-2; i++) {
         frame_data_buffer new_buf;
         new_buf.buf_size = BUFFER_SIZE;
         new_buf.buffer = &main_frame_buffers[i+2];
-        while(!xQueueSend(unused_data_buf_queue, &new_buf, 1));
+        while(!xQueueSend(unused_data_buf_queue, &new_buf, TICKS_WAIT_DURATION));
     }
 
     for(int i=0; i<GENERAL_QUEUE_SIZE; i++) {
         job new_job;
         new_job.ins_buf = &main_instruction_buffer[i];
         new_job.ins_buf_size = INSTRUCTION_BUF_SIZE;
-        while(!xQueueSend(unused_instruction_queue, &new_job, 1));
+        while(!xQueueSend(unused_instruction_queue, &new_job, TICKS_WAIT_DURATION));
     }
 
     vTaskDelete(NULL);    

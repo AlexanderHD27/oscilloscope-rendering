@@ -3,6 +3,7 @@
 
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
+#include "task.h"
 
 #include "hardware/pio.h"
 #include "dac.h"
@@ -21,35 +22,34 @@
 #define LED_GREEN 17
 #define LED_YELLOW 16
 
-static uint16_t output_buffer_a [BUFFER_SIZE*2];
-static uint16_t output_buffer_b [BUFFER_SIZE*2];
 
-uint16_t (* output_buffer_a_ptr)[] = &output_buffer_a;
-uint16_t (* output_buffer_b_ptr)[] = &output_buffer_a;
+void provide_job_task(void * param) {
+    while (true) {
+        void * ins_buff = acquire_instruction_buf();
+        submit_instructions(ins_buff, 64);
+        vTaskDelay(10);
+    }
+}
+
 
 int main() {
 
-    //pregen_square_wave(output_buffer_a, BUFFER_SIZE);
-
-    pregen_rect(output_buffer_a, BUFFER_SIZE, 
-        CONV_NORMAL_TO_UINT16(-1.00), CONV_NORMAL_TO_UINT16(-1.00),
-        CONV_NORMAL_TO_UINT16(+0.25), CONV_NORMAL_TO_UINT16(+0.25) 
-    );
-
-    pregen_rect(output_buffer_b, BUFFER_SIZE, 
-        CONV_NORMAL_TO_UINT16(-0.25), CONV_NORMAL_TO_UINT16(-0.25), 
-        CONV_NORMAL_TO_UINT16(+1.00), CONV_NORMAL_TO_UINT16(+1.00)
-    );
-
+    // Init Debug LEDs
     const uint32_t gpio_out_mask = (1 << LED) | (1 << LED_GREEN) | (1 << LED_YELLOW);
     gpio_init_mask(gpio_out_mask);
     gpio_set_dir_masked(gpio_out_mask, gpio_out_mask);
 
+    // Claim PIO & sm
     PIO pio = pio0;
     uint sm = pio_claim_unused_sm(pio, true);
-    init_dac(pio, sm,
-        DATA_PIN_START, CTRL_PIN_START
-    );
 
+    // Init DAC
+    init_dac(pio, sm, DATA_PIN_START, CTRL_PIN_START);
+
+    // Create Test Task for providing a constant stream of instruction
+    TaskHandle_t provide_job_task_handle;
+    xTaskCreate(provide_job_task, "[Test] Create Jobs", 128, NULL, 1, &provide_job_task_handle);
+
+    // Start FreeRTOS Scheduler
     vTaskStartScheduler();
 }

@@ -36,10 +36,11 @@ For testing the optics I did use a Hameg MH 312 Oscilloscope (I got this one use
 
 
 ## TODOs
-- [ ] Implement Sin Generator
+- [ ] ~~Implement Sin Generator
 - [ ] Analog Frontend
 - [ ] EEPROM connection for temp storage
-- [ ] Ring Buffer for Rendering on the PICO
+- [ ] ~~Ring Buffer for Rendering on the PICO~~ Create FreeRTOS System
+  - [ ] Fix Deadlock problem with queues
 - [ ] USB-Raw Interface
 - [ ] USB-Compressed Interfaces (Line, Points, Spline, Sin)
 - [ ] Rendering 
