@@ -48,9 +48,14 @@
         "string.h": "c",
         "assert.h": "c",
         "gen.h": "c",
-        "multicore.h": "c"
+        "multicore.h": "c",
+        "pio.h": "c",
+        "freertos.h": "c",
+        "random": "c",
+        "queue.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": true,
     "todo-tree.filtering.ignoreGitSubmodules": true,
-    "todo-tree.tree.showBadges": true
+    "todo-tree.tree.showBadges": true,
+    "terminal.integrated.scrollback": 10000
 }

@@ -87,6 +87,49 @@
             }
         },
 
+        {
+            "type": "cmake",
+            "label": "CMake: build freeRTOS_test",
+            "command": "build",
+            "targets": [
+                "freeRTOS_test"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}/firmware"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Pico: flash freeRTOS_test",
+            "command": [
+                "scripts/flash.exp",
+                "${workspaceRoot}/firmware/build/bin/freeRTOS_test.elf"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}/firmware"
+            },
+            "group": "test",
+
+            "dependsOn": ["CMake: build freeRTOS_test"],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
 
         {
             "type": "shell",
