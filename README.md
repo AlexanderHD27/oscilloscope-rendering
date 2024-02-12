@@ -8,44 +8,78 @@ Drawing on analog oscilloscope is almost a classic in the electronics/microcontr
 This is done by setting the scope to XY-Mode and then controlling the X/Y-deflection of the electron-beam.
 
 This Project is my shot at this. I use custom hardware (build on perf-board) to archive this goal. I have build
-a 2-Channel 16bit DAC with an refresh rate of around 1 MSample per second. Further more a positioning-cross was implemented
+a 2-Channel 16bit DAC with an refresh rate of around 1 MSample per second. Further more a usb-interface + driver shall be developed.
 
 <p float="left">
-  <img src="./docs/position-corss.jpeg" width="500">
-  <img src="./docs/squares.jpeg" width="500">
+  <img src="./docs/images/position-corss.jpeg" width="500">
+  <img src="./docs/images/squares.jpeg" width="500">
 </p>
 
+My current todo list can be found [here](TODO.md)
+
 ### Hardware
-![System Diagram Hardware](./docs/HardwareSystemDiagram.svg)
 
-I'm using an [Raspberry Pico](https://www.raspberrypi.com/products/raspberry-pi-pico/) (Code is written in C/C++ with the [PicoSDK](https://www.raspberrypi.com/documentation/pico-sdk/)). 
-The [rp2040](https://www.raspberrypi.com/documentation/microcontrollers/rp2040.html)'s PIO cores are used to archive higher data rate. 
+Everything is solder onto pref-boards an connected via pin-headers and jumpers
 
-The DAC is a R-2R-Ladder DAC on a custom PCB. The Input-Bits are feed from Octal-D-Latches ([74HC573](https://www.reichelt.de/oktal-d-type-latch-3-state-2--6-v-dil-20-74hc-573-p3264.html?search=74HC573)) in combination with some other logic ICs to reduce pin usage on the RPi Pico. Data sent via a 8-bit a parallel Bus to
-![dac pcb](./docs/dac-pcb.JPG)
+<p float="left">
+  <img src="./docs/images/assembly_stacked_pref_boards.JPG" width="500">
+  <img src="./docs/images/dac-pcb.JPG" width="500">
+</p>
+
+<img src="./docs/drawio/HardwareSystemDiagram/HardwareSystemDiagram.svg" width="500">
+
+(Diagram of the System-Hardware components)
+
+The DACs are R-2R-Ladder DAC on a made custom PCB. The Input-Bits are feed from Octal-D-Latches ([74HC573](https://www.reichelt.de/oktal-d-type-latch-3-state-2--6-v-dil-20-74hc-573-p3264.html?search=74HC573)) in combination with some other logic ICs to reduce pin usage on the RPi Pico. Data sent via a 8-bit a parallel Bus to
+
+<br>
 
 At 1 MHz Square Wave, the analog output signal quality is significantly degraded. Testing revealed that probably R-2R_Ladder DAC is the weak link and needs further improvement. I currently use R = 11kOhm.
 
-![Image of max output](./docs/max_sample_rate.png)
+<img src="./docs/images/max_sample_rate.png" width="500">
+
 Yellow: X-Channel, Blue: Y-Channel, Magenta: Digital Input Signal to the DAC. (Yellow and Blue are coupled to AC, they usually to remove the 2.5V offset)
 
-Everything is solder onto pref-boards an connected via pin-headers and jumpers
-![entire assembly](./docs/assembly.JPG)
+For testing the optics I did use a Hameg MH 312 Oscilloscope (I got this one used from Kleinanzeigen, so its already falling apart: semi-broken Coupling-switch, not being able focus the beam correctly, X-Pos nob falling off all the time)
 
-For testing the optics I did use a Hameg MH 312 Oscilloscope (I got this one used from Kleinanzeigen, so its already falling apart: semi-broken Coupling-switch, not being able focus the beam correctly, X-Pos know falling off all the time)
+### Firmware
 
+I'm using an RP2040 on a [Raspberry Pico](https://www.raspberrypi.com/products/raspberry-pi-pico/). Code is written in C/C++ with the [PicoSDK](https://www.raspberrypi.com/documentation/pico-sdk/). 
 
-## TODOs
-- [ ] ~~Implement Sin Generator
-- [ ] Analog Frontend
-- [ ] EEPROM connection for temp storage
-- [ ] ~~Ring Buffer for Rendering on the PICO~~ Create FreeRTOS System
-  - [ ] Fix Deadlock problem with queues
-- [ ] USB-Raw Interface
-- [ ] USB-Compressed Interfaces (Line, Points, Spline, Sin)
-- [ ] Rendering 
-  - [ ] 3D-Cube  
-  - [ ] Terminal
-  - [ ] Bad Apple?
+One of the [rp2040](https://www.raspberrypi.com/documentation/microcontrollers/rp2040.html)'s PIO cores is used in combination with a DMA-Channel to archive higher data rate.
 
+The DataFlow is based FreeRTOS's Queues.
+<img src="./docs/drawio/DataFlow_RP2040/DataFlow_RP2040.drawio.svg" width="500">
+
+There are two type of buffers: 
+- `frame_buffers`: These hold samples that are sent to DACs
+- `instruction_buffer`: These hold instruction that are used to generate a signal
+
+All buffers are preallocated and are only passed around by pointer, because they are to large (around 8kB in case of the frame_buffer) to be copied. `frame_buffer_t`/`instruction_buffer_t` struct only holds information of about the size and a pointer to the frame/instruction buffer.
+
+The Systems main buffer-cycles:
+
+##### 1. instruction_buffer Cycle
+
+The IO-handler (e.g USB or UART handler) requests a instruction_buffer via `acquire_instruction_buf()` from the `unused_instruction_buffer_queue` and submits the fill instruction_buffer via `submit_instructions()` to the `instruction_buffer_queue`. 
+
+The `processing_job_task` takes one instruction_buffer (if available) and generates the output signal with this. The now used instruction_buffer is submitted to `unused_instruction_buffer_queue` for the IO-handler to be picket up and filled again
+
+##### 2. frame_buffer Cycle
+
+The `processing_job_task` (aka the Signal Generator) request one unused frame_buffer from the `unused_frame_buffer_queue`. The Signal Generator now fills this buffer with the signal generated by the instruction it got. This fill buffer is then submitted to the `frame_buffer_queue`.
+
+The `__isr_dma()` Interrupt services routine is trigger on completion of the transfer of data to the PIO sm. On Trigger, the next_buf is submitted to the DMA, an stored as the current buffer. The now old frame_buffer is then pushed to the `unused_frame_buffer_queue`, which is then refilled by the `processing_job_task` again.
+Then the `__isr_dma()` pulls one frame_buffer from the `frame_buffer_queue`.
+
+This is not done on every cycle but on every `FRAME_REPEAT`nth cycle (can be configured in the [dacConfig.h](./firmware/src/dac/dacConfig.h)). There for every frame_buffer is repeated `FRAME_REPEAT`-times. This is done, to have a less flickery-image on the output-oscilloscope.
+
+In Case of an empty `frame_buffer_queue` the current frame is repeated (after the `FRAME_REPEAT`) until one new frame becomes available. 
+
+#### File Structure
+All files that belong to the firmware are contained [here](./firmware/)
+- [build](./firmware/build/): should not be checked into git. Contains all binaries coming out of the build system
+- [lib](./firmware/lib/): Contains git submodules (currently, the picoSDK and freeRTOS) and external libraries used in the firmware
+- [scripts](./firmware/scripts/): Contains Scripts, that compile, flash and reset the Dev-board. Also scripts to start an openocd session and serial monitor are provided
+- [src](./firmware/src): This is ware all c-sources-files go
 
