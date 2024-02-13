@@ -56,7 +56,7 @@
         "random": "c",
         "queue.h": "c"
     },
-    "cortex-debug.variableUseNaturalFormat": true,
+    "cortex-debug.variableUseNaturalFormat": false,
     "todo-tree.filtering.ignoreGitSubmodules": true,
     "todo-tree.tree.showBadges": true,
     "terminal.integrated.scrollback": 10000
