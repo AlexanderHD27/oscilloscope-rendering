@@ -51,7 +51,6 @@ void process_job(instruction_buffer_t instructions, frame_buffer_t target_frame_
     uint param_index = 0;
    
     uint8_t current_byte;
-    uint16_t param;
     __instruction_t ins;
     enum INSTRUCTION_SEL_CHANNEL channel;
 
@@ -110,12 +109,11 @@ void process_job(instruction_buffer_t instructions, frame_buffer_t target_frame_
 
         // Reading Parameters
         case READ_PARAM_HIGH: {
-            param = current_byte << 8;
+            ins.param[param_index] = current_byte << 8;
             parse_state = READ_PARAM_LOW;
         }   break;
 
         case READ_PARAM_LOW: {
-            ins.param[param_index] = param;
             ins.param[param_index] |= current_byte;
 
             param_count--;
@@ -144,13 +142,14 @@ void process_job(instruction_buffer_t instructions, frame_buffer_t target_frame_
     }
 }
 
-// FIXME: Offset are incorrect
 #define PARAM_CONST_LEVEL 0
+
 #define PARAM_LINE_FROM_VALUE 0
 #define PARAM_LINE_TO_VALUE 1
+
 #define PARAM_CUBIC_P0 0
-#define PARAM_CUBIC_P1 2
-#define PARAM_CUBIC_P2 4
+#define PARAM_CUBIC_P1 1
+#define PARAM_CUBIC_P2 2
 
 // Using fix-point notation, the rp2040 has no FPU, so float operation take to long :/
 // But the rp2040 has 32bit addition/multiplication
@@ -237,9 +236,9 @@ void gen_quadratic_f(__instruction_t ins, uint16_t * buffer) {
 
 void gen_quadratic(__instruction_t ins, uint16_t * buffer) {
     uint32_t x, y, c0, c1, c2;
-    uint32_t p0 = 0xffff;//ins.param[PARAM_CUBIC_P0];
+    uint32_t p0 = ins.param[PARAM_CUBIC_P0];
     uint32_t p1 = ins.param[PARAM_CUBIC_P1];
-    uint32_t p2 = 0xffff;//ins.param[PARAM_CUBIC_P2];
+    uint32_t p2 = ins.param[PARAM_CUBIC_P2];
     const uint32_t length = (uint32_t)(ins.length);
 
     for(uint32_t i=0; i<ins.length; i++) {
@@ -276,24 +275,24 @@ size_t add_ins_line(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uint
     buffer[0] = LINE | channel;
     buffer[1] = (length & 0xff00) >> 8;
     buffer[2] = (length & 0x00ff);
-    buffer[3 + PARAM_LINE_FROM_VALUE + 1] = (from  & 0xff00) >> 8;
-    buffer[3 + PARAM_LINE_FROM_VALUE    ] = (from  & 0x00ff);
-    buffer[3 + PARAM_LINE_TO_VALUE   + 1] = (to    & 0xff00) >> 8;
-    buffer[3 + PARAM_LINE_TO_VALUE      ] = (to    & 0x00ff);
+    buffer[3 + 2*PARAM_LINE_FROM_VALUE    ] = (from  & 0xff00) >> 8;
+    buffer[3 + 2*PARAM_LINE_FROM_VALUE + 1] = (from  & 0x00ff);
+    buffer[3 + 2*PARAM_LINE_TO_VALUE      ] = (to    & 0xff00) >> 8;
+    buffer[3 + 2*PARAM_LINE_TO_VALUE   + 1] = (to    & 0x00ff);
     return 7;
 }
 
 size_t add_ins_cubic(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uint16_t length,
-    uint16_t from, uint16_t to, uint16_t ctrl) {
+    uint16_t from, uint16_t ctrl, uint16_t to) {
     buffer[0] = CUBIC | channel;
     buffer[1] = (length & 0xff00) >> 8;
     buffer[2] = (length & 0x00ff);
-    buffer[3 + PARAM_CUBIC_P0    ] = (from    & 0xff00) >> 8;
-    buffer[3 + PARAM_CUBIC_P0 + 1] = (from    & 0x00ff);
-    buffer[3 + PARAM_CUBIC_P2    ] = (to      & 0xff00) >> 8;
-    buffer[3 + PARAM_CUBIC_P2 + 1] = (to      & 0x00ff);
-    buffer[3 + PARAM_CUBIC_P1    ] = (ctrl    & 0xff00) >> 8;
-    buffer[3 + PARAM_CUBIC_P1 + 1] = (ctrl    & 0x00ff);
+    buffer[3 + 2*PARAM_CUBIC_P0    ] = (from    & 0xff00) >> 8;
+    buffer[3 + 2*PARAM_CUBIC_P0 + 1] = (from    & 0x00ff);
+    buffer[3 + 2*PARAM_CUBIC_P2    ] = (to      & 0xff00) >> 8;
+    buffer[3 + 2*PARAM_CUBIC_P2 + 1] = (to      & 0x00ff);
+    buffer[3 + 2*PARAM_CUBIC_P1    ] = (ctrl    & 0xff00) >> 8;
+    buffer[3 + 2*PARAM_CUBIC_P1 + 1] = (ctrl    & 0x00ff);
     return 9;
 }
 

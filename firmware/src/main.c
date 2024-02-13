@@ -32,7 +32,7 @@ void provide_job_task(void * param) {
         //ins_buf += add_ins_line(ins_buf, Y, BUFFER_SIZE, 0xffff, 0x0000);
         
         ins_buf += add_ins_cubic(ins_buf, X, BUFFER_SIZE, 0xffff, 0x0000, 0x0000);
-        ins_buf += add_ins_cubic(ins_buf, Y, BUFFER_SIZE, 0x7fff, 0xffff, 0x0000);
+        ins_buf += add_ins_cubic(ins_buf, Y, BUFFER_SIZE, 0x0000, 0x7fff, 0xffff);
                 
         //ins_buf += add_ins_const(ins_buf, X, BUFFER_SIZE, 0xffff);
         //ins_buf += add_ins_const(ins_buf, Y, BUFFER_SIZE, 0xffff);
