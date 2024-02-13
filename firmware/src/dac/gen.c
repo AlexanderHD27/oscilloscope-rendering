@@ -79,13 +79,13 @@ void process_job(instruction_buffer_t instructions, frame_buffer_t target_frame_
             case LINE:
                 param_count = 2;
                 break;
-            case CUBIC:
+            case QUADRATIC:
                 param_count = 3;
                 break;
-            /*case QUADRATIC:
+            case CUBIC:
                 param_count = 4;
                 break;
-            case SINE:
+            /*case SINE:
                 param_count = 5;
                 break;*/
 
@@ -147,9 +147,14 @@ void process_job(instruction_buffer_t instructions, frame_buffer_t target_frame_
 #define PARAM_LINE_FROM_VALUE 0
 #define PARAM_LINE_TO_VALUE 1
 
+#define PARAM_QUADRATIC_P0 0
+#define PARAM_QUADRATIC_P1 1
+#define PARAM_QUADRATIC_P2 2
+
 #define PARAM_CUBIC_P0 0
 #define PARAM_CUBIC_P1 1
 #define PARAM_CUBIC_P2 2
+#define PARAM_CUBIC_P3 3
 
 // Using fix-point notation, the rp2040 has no FPU, so float operation take to long :/
 // But the rp2040 has 32bit addition/multiplication
@@ -170,11 +175,15 @@ void execute_instruction(__instruction_t ins, uint16_t * buffer) {
         break;
 
     case LINE:
-        gen_line(ins, buffer);
+        __gen_line(ins, buffer);
+        break;
+
+    case QUADRATIC:
+        __gen_quadratic(ins, buffer);
         break;
 
     case CUBIC:
-        gen_quadratic(ins, buffer);
+        __gen_cubic(ins, buffer);
         break;
 
     default:
@@ -182,39 +191,52 @@ void execute_instruction(__instruction_t ins, uint16_t * buffer) {
     }
 }
 
-// I'm using fixed point notation, because the RP2040 has no FPU
-// fixpoint format: signed [s][16].[15]
-typedef int32_t fixPoint_t;
-#define FIX_POINT_SHIFT 15
+// I'm using fixed point notation, because the RP2040 has no FPU and these calculation bust be quick to compute
 
-// Some fixed point util function/defines
-#define UINT_TO_FIX_POINT(x) ((fixPoint_t)(x) << FIX_POINT_SHIFT)
-#define FIX_POINT_TO_UINT16(x) (uint16_t)(x >> FIX_POINT_SHIFT)
+// signed [s][15].[16]
+#define SFP_SHIFT 15
+typedef int32_t fixedPoint_int;
+#define SFP_FROM_UINT(x) ((fixedPoint_int)(x) << SFP_SHIFT)
+#define SFP_TO_UINT16(x) (fixedPoint_int)(x >> SFP_SHIFT)
+#define SFP_DIV(x, y) (fixedPoint_int)((x << SFP_SHIFT) / y)
 
-#define FIX_POINT_DIV(a,b) (fixPoint_t)((int64_t)(a) / (b >>))
+// unsigned [16].[16]
+typedef uint32_t fixedPoint_uint;
+#define FP_SHIFT 16
+#define FP_FROM_UINT(x) ((fixedPoint_uint)(x) << FP_SHIFT)
+#define FP_MUL(x, y) (((x)*(y)) >> FP_SHIFT)
+#define FP_DIV(x, y) ((x << FP_SHIFT)/y)
+
+// unsigned [32].[32]
+typedef uint32_t doubleFixedPoint_uint;
+#define DFP_SHIFT 14
+#define DFP_FROM_UINT(x) ((doubleFixedPoint_uint)(x) << DFP_SHIFT)
+#define DFP_MUL(x, y) (((x)*(y)) >> DFP_SHIFT)
+#define DFP_DIV(x, y) ((x << DFP_SHIFT)/y)
+#define DFP_FROM_FP(x) ((doubleFixedPoint_uint)(x) << (DFP_SHIFT-FP_SHIFT))
+#define DFP_TO_FP(x) ((doubleFixedPoint_uint)(x) >> (DFP_SHIFT-FP_SHIFT))
 
 // More Complex generation function
-void gen_line(__instruction_t ins, uint16_t * buffer) {
-    fixPoint_t delta_y = UINT_TO_FIX_POINT((int32_t)(ins.param[PARAM_LINE_TO_VALUE]) - (int32_t)(ins.param[PARAM_LINE_FROM_VALUE]));
-    fixPoint_t delta_x = UINT_TO_FIX_POINT(ins.length-1);
-    volatile int32_t step = delta_y / delta_x; // This works apparently
+
+void __gen_line(__instruction_t ins, uint16_t * buffer) {
+    fixedPoint_int from = SFP_FROM_UINT(ins.param[PARAM_LINE_FROM_VALUE]);
+    fixedPoint_int to   = SFP_FROM_UINT(ins.param[PARAM_LINE_TO_VALUE]);
+
+    fixedPoint_int delta_y = to - from;
+    fixedPoint_int delta_x = SFP_FROM_UINT(ins.length-1);
+    volatile int32_t step = delta_y / delta_x;
 
     for(size_t i=0; i<ins.length; i++) {
-        buffer[i*2] = FIX_POINT_TO_UINT16(UINT_TO_FIX_POINT(i) * step);
+        buffer[i*2] = SFP_TO_UINT16(SFP_FROM_UINT(i) * step);
     }
 }
 
-// For Normal values this fix point shift is used [1].[31]
-#define FIX_POINT_DIV(a,b) ( ( (int64_t)(a) << 16 )/b )
-
-// Util function for adding instructions to a instruction list
-
 // This is to slow (39,6 ms for a full buffer per Channel) -> use of fixpoint notation
-void gen_quadratic_f(__instruction_t ins, uint16_t * buffer) {
+void __gen_quadratic_f(__instruction_t ins, uint16_t * buffer) {
     float x, y, c0, c1, c2;
-    float p0 = (float)(ins.param[PARAM_CUBIC_P0])/0xffff;
-    float p1 = (float)(ins.param[PARAM_CUBIC_P1])/0xffff;
-    float p2 = (float)(ins.param[PARAM_CUBIC_P2])/0xffff;
+    float p0 = (float)(ins.param[PARAM_QUADRATIC_P0])/0xffff;
+    float p1 = (float)(ins.param[PARAM_QUADRATIC_P1])/0xffff;
+    float p2 = (float)(ins.param[PARAM_QUADRATIC_P2])/0xffff;
     
     for(size_t i=0; i<ins.length; i++) {
         x = (float)(i)/ins.length;
@@ -228,17 +250,13 @@ void gen_quadratic_f(__instruction_t ins, uint16_t * buffer) {
     }
 }
 
-// unsigned [16].[16] 
-#define FP_SHIFT 16
-#define FP_FROM_UINT(x) ((uint32_t)(x) << FP_SHIFT)
-#define FP_MUL(x, y) (((x)*(y)) >> FP_SHIFT)
-#define FP_DIV(x, y) ((x << FP_SHIFT)/y)
-
-void gen_quadratic(__instruction_t ins, uint16_t * buffer) {
-    uint32_t x, y, c0, c1, c2;
-    uint32_t p0 = ins.param[PARAM_CUBIC_P0];
-    uint32_t p1 = ins.param[PARAM_CUBIC_P1];
-    uint32_t p2 = ins.param[PARAM_CUBIC_P2];
+// This takes ~17.0ms to compute
+void __gen_quadratic(__instruction_t ins, uint16_t * buffer) {
+    // TODO: c0 is symmetric to c2, this can optimized further
+    fixedPoint_uint x, y, c0, c1, c2;
+    uint32_t p0 = ins.param[PARAM_QUADRATIC_P0];
+    uint32_t p1 = ins.param[PARAM_QUADRATIC_P1];
+    uint32_t p2 = ins.param[PARAM_QUADRATIC_P2];
     const uint32_t length = (uint32_t)(ins.length);
 
     for(uint32_t i=0; i<ins.length; i++) {
@@ -252,6 +270,34 @@ void gen_quadratic(__instruction_t ins, uint16_t * buffer) {
         buffer[i*2] = (uint16_t)((y*0xffff) >> FP_SHIFT);
     }
 }
+
+// This takes ~17.0ms to compute
+void __gen_cubic(__instruction_t ins, uint16_t * buffer) {
+    // TODO: c0, c1 are symmetric to c2, c3, this can optimized further
+    fixedPoint_uint x, x_inv, y, c0, c1, c2, c3, q;
+    uint32_t p0 = ins.param[PARAM_CUBIC_P0];
+    uint32_t p1 = ins.param[PARAM_CUBIC_P1];
+    uint32_t p2 = ins.param[PARAM_CUBIC_P2];
+    uint32_t p3 = ins.param[PARAM_CUBIC_P3];
+    const uint32_t length = (uint32_t)(ins.length);
+
+    for(uint32_t i=0; i<ins.length; i++) {
+        x = FP_DIV(i, length);
+        q = (FP_FROM_UINT(1) - 2*x + FP_MUL(x, x)); 
+        c0 = FP_MUL(q, (FP_FROM_UINT(1) - x));
+        c1 = FP_MUL(q, 3*x);
+
+        x_inv = FP_DIV(length - i, length);
+        q = (FP_FROM_UINT(1) - 2*x_inv + FP_MUL(x_inv, x_inv)); 
+        c2 = FP_MUL(q, 3*x_inv);
+        c3 = FP_MUL(q, (FP_FROM_UINT(1) - x_inv));
+
+        y = FP_MUL(c0, p0) + FP_MUL(c1, p1) + FP_MUL(c2, p2) + FP_MUL(c3, p3);
+
+        buffer[i*2] = (uint16_t)((y*0xffff) >> FP_SHIFT);
+    }
+}
+
 
 size_t add_ins_none(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uint16_t length) {
     buffer[0] = NONE | channel;
@@ -282,17 +328,33 @@ size_t add_ins_line(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uint
     return 7;
 }
 
-size_t add_ins_cubic(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uint16_t length,
+size_t add_ins_quadratic(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uint16_t length,
     uint16_t from, uint16_t ctrl, uint16_t to) {
+    buffer[0] = QUADRATIC | channel;
+    buffer[1] = (length & 0xff00) >> 8;
+    buffer[2] = (length & 0x00ff);
+    buffer[3 + 2*PARAM_QUADRATIC_P0    ] = (from    & 0xff00) >> 8;
+    buffer[3 + 2*PARAM_QUADRATIC_P0 + 1] = (from    & 0x00ff);
+    buffer[3 + 2*PARAM_QUADRATIC_P2    ] = (to      & 0xff00) >> 8;
+    buffer[3 + 2*PARAM_QUADRATIC_P2 + 1] = (to      & 0x00ff);
+    buffer[3 + 2*PARAM_QUADRATIC_P1    ] = (ctrl    & 0xff00) >> 8;
+    buffer[3 + 2*PARAM_QUADRATIC_P1 + 1] = (ctrl    & 0x00ff);
+    return 9;
+}
+
+size_t add_ins_cubic(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uint16_t length,
+    uint16_t from, uint16_t ctrl_from, uint16_t ctrl_to, uint16_t to) {
     buffer[0] = CUBIC | channel;
     buffer[1] = (length & 0xff00) >> 8;
     buffer[2] = (length & 0x00ff);
-    buffer[3 + 2*PARAM_CUBIC_P0    ] = (from    & 0xff00) >> 8;
-    buffer[3 + 2*PARAM_CUBIC_P0 + 1] = (from    & 0x00ff);
-    buffer[3 + 2*PARAM_CUBIC_P2    ] = (to      & 0xff00) >> 8;
-    buffer[3 + 2*PARAM_CUBIC_P2 + 1] = (to      & 0x00ff);
-    buffer[3 + 2*PARAM_CUBIC_P1    ] = (ctrl    & 0xff00) >> 8;
-    buffer[3 + 2*PARAM_CUBIC_P1 + 1] = (ctrl    & 0x00ff);
-    return 9;
+    buffer[3 + 2*PARAM_CUBIC_P0    ] = (from      & 0xff00) >> 8;
+    buffer[3 + 2*PARAM_CUBIC_P0 + 1] = (from      & 0x00ff);
+    buffer[3 + 2*PARAM_CUBIC_P1    ] = (ctrl_from & 0xff00) >> 8;
+    buffer[3 + 2*PARAM_CUBIC_P1 + 1] = (ctrl_from & 0x00ff);
+    buffer[3 + 2*PARAM_CUBIC_P2    ] = (ctrl_to   & 0xff00) >> 8;
+    buffer[3 + 2*PARAM_CUBIC_P2 + 1] = (ctrl_to   & 0x00ff);
+    buffer[3 + 2*PARAM_CUBIC_P3    ] = (to        & 0xff00) >> 8;
+    buffer[3 + 2*PARAM_CUBIC_P3 + 1] = (to        & 0x00ff);
+    return 11;
 }
 
