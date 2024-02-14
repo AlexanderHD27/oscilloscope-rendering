@@ -5,7 +5,7 @@ A device that draws on an oscilloscope.
 
 ## Introduction
 Drawing on analog oscilloscope is almost a classic in the electronics/microcontroller community now.
-This is done by setting the scope to XY-Mode and then controlling the X/Y-deflection of the electron-beam.
+This is done by setting the scope to XY-Mode and then controlling the X/Y-deflection of the electron-beam. My Scope has no Z-Channel. I cannot control the intensity of beam (or switches off) by voltage yet
 
 This Project is my shot at this. I use custom hardware (build on perf-board) to archive this goal. I have build
 a 2-Channel 16bit DAC with an refresh rate of around 1 MSample per second. Further more a usb-interface + driver shall be developed.
@@ -13,6 +13,7 @@ a 2-Channel 16bit DAC with an refresh rate of around 1 MSample per second. Furth
 <p float="left">
   <img src="./docs/images/position-corss.jpeg" width="500">
   <img src="./docs/images/squares.jpeg" width="500">
+  <img src="./docs/video/sin_demo.gif" width="500">
 </p>
 
 My current todo list can be found [here](TODO.md)
