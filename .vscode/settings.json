@@ -54,7 +54,8 @@
         "pio.h": "c",
         "freertos.h": "c",
         "random": "c",
-        "queue.h": "c"
+        "queue.h": "c",
+        "string_view": "c"
     },
     "cortex-debug.variableUseNaturalFormat": false,
     "todo-tree.filtering.ignoreGitSubmodules": true,

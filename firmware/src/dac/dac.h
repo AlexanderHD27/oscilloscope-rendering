@@ -62,6 +62,7 @@ void __gen_line(__instruction_t ins, uint16_t * buffer);
 void __gen_quadratic_f(__instruction_t ins, uint16_t * buffer);
 void __gen_quadratic(__instruction_t ins, uint16_t * buffer);
 void __gen_cubic(__instruction_t ins, uint16_t * buffer);
+void __gen_sine(__instruction_t ins, uint16_t * buffer);
 
 // Util Function for adding instruction to the instruction list
 
@@ -70,6 +71,7 @@ size_t add_ins_const(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uin
 size_t add_ins_line(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uint16_t length, uint16_t from, uint16_t to);
 size_t add_ins_quadratic(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uint16_t length, uint16_t from, uint16_t to, uint16_t ctrl);
 size_t add_ins_cubic(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uint16_t length, uint16_t from, uint16_t ctrl_from, uint16_t ctrl_to, uint16_t to);
+size_t add_ins_sine(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uint16_t length, uint16_t from, uint16_t to, uint16_t period, uint16_t phase);
 
 /**
  * Submits a new instruction list to the dac. This function should be use by the IO interface (e.g. USB) to submit an instruction list

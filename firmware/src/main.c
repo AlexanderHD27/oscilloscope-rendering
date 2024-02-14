@@ -22,6 +22,7 @@
 #define LED_GREEN 17
 #define LED_YELLOW 16
 
+uint32_t counter = 0;
 
 void provide_job_task(void * param) {
     while (true) {
@@ -33,10 +34,15 @@ void provide_job_task(void * param) {
         //ins_buf += add_ins_line(ins_buf, X, BUFFER_SIZE/2, 0xffff, 0x0000);
         //ins_buf += add_ins_line(ins_buf, Y, BUFFER_SIZE/2, 0x0000, 0xffff);
 
-        ins_buf += add_ins_cubic(ins_buf, X, BUFFER_SIZE/2, 0xffff, 0xffff, 0x0000, 0x0000);
-        ins_buf += add_ins_cubic(ins_buf, Y, BUFFER_SIZE/2, 0x0000, 0xffff, 0x0000, 0xffff);
-        ins_buf += add_ins_cubic(ins_buf, X, BUFFER_SIZE/2, 0x0000, 0x0000, 0xffff, 0xffff);
-        ins_buf += add_ins_cubic(ins_buf, Y, BUFFER_SIZE/2, 0xffff, 0x0000, 0xffff, 0x0000);
+        //ins_buf += add_ins_cubic(ins_buf, X, BUFFER_SIZE/2, 0x0000, 0x7fff, 0x0000, 0x7fff);
+        //ins_buf += add_ins_line(ins_buf, Y, BUFFER_SIZE/2, 0x0000, 0x7fff);
+
+        //ins_buf += add_ins_cubic(ins_buf, X, BUFFER_SIZE/2, 0x7fff, 0x0000, 0x7fff, 0x0000);
+        //ins_buf += add_ins_line(ins_buf, Y, BUFFER_SIZE/2, 0x7fff, 0x0000);
+
+        //ins_buf += add_ins_cubic(ins_buf, Y, BUFFER_SIZE, 0x0000, 0x0000, 0x7fff, 0xffff);
+        //ins_buf += add_ins_cubic(ins_buf, X, BUFFER_SIZE/2, 0x0000, 0x0000, 0xffff, 0xffff);
+        //ins_buf += add_ins_cubic(ins_buf, Y, BUFFER_SIZE/2, 0xffff, 0x0000, 0xffff, 0x0000);
 
         //ins_buf += add_ins_quadratic(ins_buf, X, BUFFER_SIZE, 0xffff, 0x0000, 0x0000);
         //ins_buf += add_ins_quadratic(ins_buf, Y, BUFFER_SIZE, 0x0000, 0x0000, 0x0000);            
@@ -44,6 +50,13 @@ void provide_job_task(void * param) {
         //ins_buf += add_ins_const(ins_buf, X, BUFFER_SIZE, 0xffff);
         //ins_buf += add_ins_const(ins_buf, Y, BUFFER_SIZE, 0xffff);
 
+        ins_buf += add_ins_sin(ins_buf, X, BUFFER_SIZE, 0x0000, 0xffff, (uint16_t)(BUFFER_SIZE), 0x0000);
+        ins_buf += add_ins_sin(ins_buf, Y, BUFFER_SIZE, 0x0000, 0xffff, (uint16_t)(BUFFER_SIZE), 0x0400);
+        
+        //ins_buf += add_ins_const(ins_buf, Y, BUFFER_SIZE/2, 0x0000);
+        //ins_buf += add_ins_const(ins_buf, Y, BUFFER_SIZE/2, 0xffff);
+        //ins_buf += add_ins_sin(ins_buf, Y, BUFFER_SIZE, 0x0000, 0xffff, (uint16_t)(BUFFER_SIZE), counter >> 16);     
+        //counter = (counter + (0b1 << 15)) % (BUFFER_SIZE << 16);
         submit_instructions(__ins_buf, ins_buf - __ins_buf);
     }
 }
