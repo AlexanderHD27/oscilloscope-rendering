@@ -24,7 +24,7 @@ frame_buffer_t next_output_buffer;
  * This should be set as isr for dma
 */ 
 void __isr_dma() {
-    static repeat_counter = 0;
+    static uint repeat_counter = 0;
 
     if(repeat_counter == 0) { // Every FRAME_REPEATS cycles, the frame is updated
         // Refuel the DMA with the new buffer as soon as the isr triggers

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
@@ -28,35 +29,11 @@ void provide_job_task(void * param) {
     while (true) {
         uint8_t * __ins_buf = acquire_instruction_buffer_pointer();
         uint8_t * ins_buf = __ins_buf;
-
-        //ins_buf += add_ins_line(ins_buf, X, BUFFER_SIZE/2, 0x0000, 0xffff);
-        //ins_buf += add_ins_line(ins_buf, Y, BUFFER_SIZE/2, 0xffff, 0x0000);
-        //ins_buf += add_ins_line(ins_buf, X, BUFFER_SIZE/2, 0xffff, 0x0000);
-        //ins_buf += add_ins_line(ins_buf, Y, BUFFER_SIZE/2, 0x0000, 0xffff);
-
-        //ins_buf += add_ins_cubic(ins_buf, X, BUFFER_SIZE/2, 0x0000, 0x7fff, 0x0000, 0x7fff);
-        //ins_buf += add_ins_line(ins_buf, Y, BUFFER_SIZE/2, 0x0000, 0x7fff);
-
-        //ins_buf += add_ins_cubic(ins_buf, X, BUFFER_SIZE/2, 0x7fff, 0x0000, 0x7fff, 0x0000);
-        //ins_buf += add_ins_line(ins_buf, Y, BUFFER_SIZE/2, 0x7fff, 0x0000);
-
-        //ins_buf += add_ins_cubic(ins_buf, Y, BUFFER_SIZE, 0x0000, 0x0000, 0x7fff, 0xffff);
-        //ins_buf += add_ins_cubic(ins_buf, X, BUFFER_SIZE/2, 0x0000, 0x0000, 0xffff, 0xffff);
-        //ins_buf += add_ins_cubic(ins_buf, Y, BUFFER_SIZE/2, 0xffff, 0x0000, 0xffff, 0x0000);
-
-        //ins_buf += add_ins_quadratic(ins_buf, X, BUFFER_SIZE, 0xffff, 0x0000, 0x0000);
-        //ins_buf += add_ins_quadratic(ins_buf, Y, BUFFER_SIZE, 0x0000, 0x0000, 0x0000);            
-    
-        //ins_buf += add_ins_const(ins_buf, X, BUFFER_SIZE, 0xffff);
-        //ins_buf += add_ins_const(ins_buf, Y, BUFFER_SIZE, 0xffff);
-
-        ins_buf += add_ins_sin(ins_buf, X, BUFFER_SIZE, 0x0000, 0xffff, (uint16_t)(BUFFER_SIZE), 0x0000);
-        ins_buf += add_ins_sin(ins_buf, Y, BUFFER_SIZE, 0x0000, 0xffff, (uint16_t)(BUFFER_SIZE), 0x0400);
-        
-        //ins_buf += add_ins_const(ins_buf, Y, BUFFER_SIZE/2, 0x0000);
-        //ins_buf += add_ins_const(ins_buf, Y, BUFFER_SIZE/2, 0xffff);
-        //ins_buf += add_ins_sin(ins_buf, Y, BUFFER_SIZE, 0x0000, 0xffff, (uint16_t)(BUFFER_SIZE), counter >> 16);     
-        //counter = (counter + (0b1 << 15)) % (BUFFER_SIZE << 16);
+        ins_buf += add_ins_sine(ins_buf, X, BUFFER_SIZE/2, 0x00a0, 0xff60, (uint16_t)(BUFFER_SIZE/2/3), BUFFER_SIZE/2/4);
+        ins_buf += add_ins_sine(ins_buf, Y, BUFFER_SIZE/2, 0x00a0, 0xff60, (uint16_t)(BUFFER_SIZE/2/2), 0x0000);
+        ins_buf += add_ins_const(ins_buf, X, BUFFER_SIZE/2, 0x7fff - 0xffff*(0.5*cosf( PI*((float)(counter*3)/(BUFFER_SIZE/2-1)))) );
+        ins_buf += add_ins_const(ins_buf, Y, BUFFER_SIZE/2, 0x7fff - 0xffff*(0.5*sinf( PI*((float)(counter*2)/(BUFFER_SIZE/2-1)))) );
+counter = (counter + 0x1f) % BUFFER_SIZE;
         submit_instructions(__ins_buf, ins_buf - __ins_buf);
     }
 }

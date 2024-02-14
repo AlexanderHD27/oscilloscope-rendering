@@ -63,6 +63,7 @@ void __gen_quadratic_f(__instruction_t ins, uint16_t * buffer);
 void __gen_quadratic(__instruction_t ins, uint16_t * buffer);
 void __gen_cubic(__instruction_t ins, uint16_t * buffer);
 void __gen_sine(__instruction_t ins, uint16_t * buffer);
+void __gen_sine_taylor(__instruction_t ins, uint16_t * buffer);
 
 // Util Function for adding instruction to the instruction list
 

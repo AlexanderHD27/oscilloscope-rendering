@@ -320,7 +320,6 @@ void __gen_sine(__instruction_t ins, uint16_t * buffer) {
     const uint16_t period = ins.param[PARAM_SIN_PERIOD]; 
     const uint16_t phase = ins.param[PARAM_SIN_PHASE]; 
     const uint16_t half_period = period / 2;
-    const uint32_t length = (uint32_t)(ins.length);
     const uint32_t sub = ((0b1 << (FIX_POINT_SINE_SHIFT))-1);
     bool neg = false;
 
@@ -339,30 +338,27 @@ void __gen_sine(__instruction_t ins, uint16_t * buffer) {
     }
 }
 
-// TODO: Create better implementation of sin(x) based on taylor seizes
-
 #define PRE_POWER_3(x) (x*x*x)
 #define PRE_POWER_5(x) (x*x*x*x*x)
  
-#define CORRECTION_FACTOR 1.0694 // This a correction value to compensate for the overshoot of the taylor-series (up to x^5). This cause a max deviation of 4% 
 #define HALF_PI PI/2
-#define SINE_FACTOR_1 FP_FROM_FLOAT(HALF_PI/CORRECTION_FACTOR)
-#define SINE_FACTOR_3 FP_FROM_FLOAT(PRE_POWER_3(HALF_PI)/(6 + CORRECTION_FACTOR))
-#define SINE_FACTOR_5 FP_FROM_FLOAT(PRE_POWER_5(HALF_PI)/(120 + CORRECTION_FACTOR)) // This -0x12f is a correction factor, due to probably rounding errors
+#define SINE_FACTOR_1 FP_FROM_FLOAT(HALF_PI)
+#define SINE_FACTOR_3 FP_FROM_FLOAT(PRE_POWER_3(HALF_PI)/(6))
+#define SINE_FACTOR_5 FP_FROM_FLOAT(PRE_POWER_5(HALF_PI)/(120)) // This -0x12f is a correction factor, due to probably rounding errors
 
 // This uses taylor-series to approx. a sin wave. Its reasonable accurate, but takes longer to computer
-// see https://www.desmos.com/calculator/iynju4h83x
+// see https://www.desmos.com/calculator/77trwqesdm
 // This takes ~65.9ms to compute for 4096 Samples (2 Channels) (This is too slow)
 
 void __gen_sine_taylor(__instruction_t ins, uint16_t * buffer) {
     fixedPoint_uint x, x2, x3, x5, c1, c3, c5, y_out;
-    uint32_t;
     uint64_t y;
 
-    const uint32_t min_level = ins.param[PARAM_SIN_FROM];
-    const uint32_t max_level = ins.param[PARAM_SIN_TO];
-    const p2p = (max_level - min_level);
-    const uint32_t amp = p2p/2;
+    // This clamping of the input range values is done so we don't hit an accidental overall (tested values)
+    const uint32_t min_level = MIN(MAX(ins.param[PARAM_SIN_FROM], 0x00a0), 0xff60);
+    const uint32_t max_level = MIN(MAX(ins.param[PARAM_SIN_TO], 0x00a0), 0xff60);
+
+    const uint32_t amp = (max_level - min_level)/2;
     const uint32_t mid_point = amp + min_level;
 
     const uint16_t phase = ins.param[PARAM_SIN_PHASE];
@@ -372,13 +368,12 @@ void __gen_sine_taylor(__instruction_t ins, uint16_t * buffer) {
     volatile uint32_t i_quod_cycle, quadrant, period_offset, i;
     volatile const uint32_t quod_cycle = period / 4;
 
-
     for(uint32_t i_=0; i_<length; i_++) {
         i = i_;
         x = FP_DIV(FP_FROM_UINT((i*4) % period+1), FP_FROM_UINT(period-1)); // Convert to normal Value
         
         // Create Taylor-1/4-Cycle
-        // FIXME: This should be computable without uint64 
+        // TODO: This should be computable without uint64 
         x2 = FP_MUL(x, x);
         x3 = FP_MUL(x, x2);
         x5 = FP_MUL(x3, x2);
@@ -465,7 +460,7 @@ size_t add_ins_cubic(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uin
     return 11;
 }
 
-size_t add_ins_sin(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uint16_t length, 
+size_t add_ins_sine(uint8_t * buffer, enum INSTRUCTION_SEL_CHANNEL channel, uint16_t length, 
     uint16_t from, uint16_t to, uint16_t period, uint16_t phase) {
     buffer[0] = SINE | channel;
     buffer[1] = (length & 0xff00) >> 8;
