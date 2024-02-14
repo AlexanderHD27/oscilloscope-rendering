@@ -5,11 +5,17 @@ set timeout 30
 set input_file [lindex $argv 0]
 
 spawn telnet localhost 4444
-
 expect "> " 
 send "program $input_file verify\n"
 expect "** Programming Finished **"
-send "reset\n"
+
+send "reset halt\n"
 expect "> "
+
+send "rp2040.core1 arp_reset assert 0\n"
+expect "> "
+send "rp2040.core0 arp_reset assert 0\n"
+expect "> "
+
 send "exit\n"
 exit

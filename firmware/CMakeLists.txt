@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.12)
 
-# Pull in SDK (must be before project)
-include(pico_sdk_import.cmake)
+# Including the SDK (must be before project)
+SET(PICO_SDK_PATH "/home/alexander/Projects/oscilloscope-rendering/firmware/lib/pico-sdk")
+SET(PICO_TOOLCHAIN_PATH $PICO_SDK_PATH/cmake/preload/toolchains/)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "$<1:${CMAKE_BINARY_DIR}/bin>")
+
+include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
 
 #include(pico_extras_import_optional.cmake)
 
@@ -28,20 +32,40 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-Wno-maybe-uninitialized)
 endif()
 
+# adding sources files & includes
 add_executable(main
     src/main.c
+
+    src/dac/pregen.c
+    src/dac/gen.c
+    src/dac/driver.c
+    src/dac/interface.c
+    src/dac/globals.c
+)
+
+target_include_directories(main PUBLIC 
+    src/dac
+    src/gen
+)
+
+# Add FreeRTOS
+include(freeRTOS.cmake)
+
+target_include_directories(FreeRTOS PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}
 )
 
 # Adding PIO
-pico_generate_pio_header(main ${CMAKE_CURRENT_LIST_DIR}/src/driver/dac.pio)
-
+pico_generate_pio_header(main ${CMAKE_CURRENT_LIST_DIR}/src/dac/dac.pio)
 
 # pull in common dependencies
 target_link_libraries(main 
     pico_stdlib 
+    pico_multicore
     hardware_pio
     hardware_dma
     hardware_timer
+    FreeRTOS
 )
 
 # create map/bin/hex file etc.
@@ -49,3 +73,6 @@ pico_add_extra_outputs(main)
 
 # add url via pico_set_program_url
 example_auto_set_url(main)
+
+add_subdirectory(src/test/usb)
+add_subdirectory(src/test/freeRTOS)

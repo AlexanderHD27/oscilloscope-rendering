@@ -1,0 +1,42 @@
+.program dac
+
+.define OFF   0b0001
+
+.define LD0   0b0011
+.define LD1   0b0001
+.define LD2   0b0111
+.define LD3   0b0101
+
+.define LD0_E 0b0010
+.define LD1_E 0b0000
+.define LD2_E 0b0110
+.define LD3_E 0b0100
+
+.define LDM   0b1001
+
+.origin 0x0
+
+.wrap_target
+
+SET pins, LD0           ; 1 cycle
+SET pins, LD0_E [1]     ; 2 cycles
+OUT pins, 8             ; 1 cycle
+
+SET pins, LD1
+SET pins, LD1_E [1]
+OUT pins, 8
+
+SET pins, LD2
+SET pins, LD2_E [1]
+OUT pins, 8
+
+SET pins, LD3
+SET pins, LD3_E [1]
+OUT pins, 8
+
+SET pins, OFF [1]       ; 2 cycles
+SET pins, LDM [1]       ; 2 cycles
+
+; Total (without waiting for FIFOs): 20 cycles per sample
+
+.wrap

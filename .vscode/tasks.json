@@ -11,21 +11,37 @@
             "options": {
                 "cwd": "${workspaceRoot}/firmware"
             },
-            "group": "build"
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
         },
         {
             "type": "shell",
-            "label": "Pico: flash",
+            "label": "Pico: flash main",
             "command": [
                 "scripts/flash.exp",
-                "${workspaceRoot}/firmware/build/main.elf"
+                "${workspaceRoot}/firmware/build/bin/main.elf"
             ],
             "options": {
                 "cwd": "${workspaceRoot}/firmware"
             },
             "group": "test",
 
-            "dependsOn": ["CMake: build main"]
+            "dependsOn": ["CMake: build main"],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
         },
 
         {
@@ -38,21 +54,80 @@
             "options": {
                 "cwd": "${workspaceRoot}/firmware"
             },
-            "group": "build"
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
         },
         {
             "type": "shell",
             "label": "Pico: flash usb_test",
             "command": [
                 "scripts/flash.exp",
-                "${workspaceRoot}/firmware/build/usb_test/usb_test.elf"
+                "${workspaceRoot}/firmware/build/bin/usb_test.elf"
             ],
             "options": {
                 "cwd": "${workspaceRoot}/firmware"
             },
             "group": "test",
 
-            "dependsOn": ["CMake: build usb_test"]
+            "dependsOn": ["CMake: build usb_test"],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+
+        {
+            "type": "cmake",
+            "label": "CMake: build freeRTOS_test",
+            "command": "build",
+            "targets": [
+                "freeRTOS_test"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}/firmware"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Pico: flash freeRTOS_test",
+            "command": [
+                "scripts/flash.exp",
+                "${workspaceRoot}/firmware/build/bin/freeRTOS_test.elf"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}/firmware"
+            },
+            "group": "test",
+
+            "dependsOn": ["CMake: build freeRTOS_test"],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
         },
 
 
@@ -66,6 +141,21 @@
                 "cwd": "${workspaceRoot}/firmware"
             },
             "isBackground": true
-        }
+        },
+        {
+            "type": "cmake",
+            "label": "CMake: Clean",
+            "command": "clean"
+        },
+        {
+            "type": "cmake",
+            "label": "CMake: Clean Rebuild",
+            "command": "cleanRebuild"
+        },
+        {
+            "type": "cmake",
+            "label": "CMake: Configure",
+            "command": "configure"
+        },
     ]
 }

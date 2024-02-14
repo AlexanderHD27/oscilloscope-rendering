@@ -44,7 +44,21 @@
     "cmake.buildDirectory": "${workspaceFolder}/firmware/build",
     "cmake.configureOnOpen": true,
     "files.associations": {
-        "timer.h": "c"
+        "timer.h": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "string.h": "c",
+        "assert.h": "c",
+        "gen.h": "c",
+        "multicore.h": "c",
+        "pio.h": "c",
+        "freertos.h": "c",
+        "random": "c",
+        "queue.h": "c",
+        "string_view": "c"
     },
-    
+    "cortex-debug.variableUseNaturalFormat": false,
+    "todo-tree.filtering.ignoreGitSubmodules": true,
+    "todo-tree.tree.showBadges": true,
+    "terminal.integrated.scrollback": 10000
 }
