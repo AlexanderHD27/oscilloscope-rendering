@@ -378,7 +378,7 @@ void __gen_sine_taylor(__instruction_t ins, uint16_t * buffer) {
         x = FP_DIV(FP_FROM_UINT((i*4) % period+1), FP_FROM_UINT(period-1)); // Convert to normal Value
         
         // Create Taylor-1/4-Cycle
-        // This should be computable without uint64 
+        // FIXME: This should be computable without uint64 
         x2 = FP_MUL(x, x);
         x3 = FP_MUL(x, x2);
         x5 = FP_MUL(x3, x2);
@@ -396,12 +396,11 @@ void __gen_sine_taylor(__instruction_t ins, uint16_t * buffer) {
         quadrant = (i_quod_cycle)/(quod_cycle);
         period_offset = (i / period) * period;
 
-        // FIXME: There is a problem with the computation of the last value in a taylor-segment. It does not seem to be written to the buffer :/
         switch (quadrant) {
         case 0: buffer[2*(((period_offset + i_quod_cycle               ) + phase) % length)] = mid_point + y_out; break;
-        case 1: buffer[2*(((period_offset + 3*quod_cycle - i_quod_cycle) + phase) % length)] = mid_point + y_out; break;
+        case 1: buffer[2*(((period_offset + (3*quod_cycle-1) - i_quod_cycle) + phase) % length)] = mid_point + y_out; break;
         case 2: buffer[2*(((period_offset + i_quod_cycle               ) + phase) % length)] = mid_point - y_out; break;
-        case 3: buffer[2*(((period_offset + 7*quod_cycle - i_quod_cycle) + phase) % length)] = mid_point - y_out; break;
+        case 3: buffer[2*(((period_offset + (7*quod_cycle-1) - i_quod_cycle) + phase) % length)] = mid_point - y_out; break;
         }    
     }
 
