@@ -50,6 +50,7 @@ I'm using an RP2040 on a [Raspberry Pico](https://www.raspberrypi.com/products/r
 One of the [rp2040](https://www.raspberrypi.com/documentation/microcontrollers/rp2040.html)'s PIO cores is used in combination with a DMA-Channel to archive higher data rate.
 
 The DataFlow is based FreeRTOS's Queues.
+
 <img src="./docs/drawio/DataFlow_RP2040/DataFlow_RP2040.drawio.svg" width="500">
 
 There are two type of buffers: 
