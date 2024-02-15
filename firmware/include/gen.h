@@ -28,14 +28,14 @@ typedef uint16_t (* buffer_pointer_t)[];
  * @brief hold size and buffer pointer of a frame buffer
  */
 /**
- * @var frame_buffer_t::size
+ * @var frameBuffer_t::size
  * This is not the actual size, but how many samples it holds per Channel.
  * This means the actual size is size * 2 * sizeof(uint16_t)
 */
 typedef struct {
     buffer_pointer_t buffer;
     size_t size;
-} frame_buffer_t;
+} frameBuffer_t;
 
 /**
  * @brief IDs of instruction for signal generation
@@ -64,7 +64,7 @@ enum InstructionChannelTarget {
 /**
  * @var instruction_t::length
  * how many samples should be generated must be (in total with all the other instruction for each channel) should be equal to @ref BUFFER_SIZE. 
- * For processing with @ref gen_executeInstruction the @ref frame_buffer_t is not overwritten, so old data remains in it
+ * For processing with @ref gen_executeInstruction the @ref frameBuffer_t is not overwritten, so old data remains in it
 */
 /**
  * @var instruction_t::id
@@ -99,7 +99,7 @@ typedef struct {
  * @param instructions Holds size and pointer to the instruction to process
  * @param targetFrameBuffer Target FrameBuffer that is filled with resulting signal. The Buffer is not overwrite, so hold data may remain in it 
  */
-void gen_processInstruction(instructionBuffer_t instructions, frame_buffer_t targetFrameBuffer);
+void gen_processInstruction(instructionBuffer_t instructions, frameBuffer_t targetFrameBuffer);
 
 /**
  * @brief Executes a single already parsed instruction and writes the result to the buffer

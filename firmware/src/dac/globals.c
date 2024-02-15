@@ -16,10 +16,10 @@
 
 #include "dac.h"
 
-QueueHandle_t unused_instruction_buffer_queue;
-QueueHandle_t instruction_buffer_queue;
-QueueHandle_t unused_frame_buffer_queue;
-QueueHandle_t frame_buffer_queue;
+QueueHandle_t g_unusedInstructionBufferQueue;
+QueueHandle_t g_instructionBufferQueue;
+QueueHandle_t g_unusedFrameBufferQueue;
+QueueHandle_t g_frameBufferQueue;
 
 TaskHandle_t processingJobTask;
 

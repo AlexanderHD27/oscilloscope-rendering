@@ -26,8 +26,8 @@
 int dma_chan;
 
 // Output Buffer should never be touched besides the ISR
-frame_buffer_t current_output_buffer; 
-frame_buffer_t next_output_buffer;
+frameBuffer_t current_output_buffer; 
+frameBuffer_t next_output_buffer;
 
 /**
  * @brief Interrupt service routine called when PIO finishes a frame
@@ -36,7 +36,7 @@ frame_buffer_t next_output_buffer;
  * It acks the irq, set the new buffer for the dma-channel to read, flips the current used buffer marker
  * This should be set as isr for dma
 */ 
-static void __isr_dma() {
+static void isrDma() {
     static uint repeat_counter = 0;
 
     if(repeat_counter == 0) { // Every FRAME_REPEATS cycles, the frame is updated
@@ -47,19 +47,19 @@ static void __isr_dma() {
         BaseType_t xTaskWokenByReceive = pdFALSE;    
 
         // Swapping around buffers (Queue <- current_output_buffer <- next_output_buffer)
-        frame_buffer_t old_output_buffer = current_output_buffer; 
+        frameBuffer_t old_output_buffer = current_output_buffer; 
         current_output_buffer = next_output_buffer;
 
         // If old buffers is used, don't send it back
         if(current_output_buffer.buffer != old_output_buffer.buffer) {
-            while(!xQueueSendFromISR(unused_frame_buffer_queue, &old_output_buffer, &xTaskWokenByReceive));
+            while(!xQueueSendFromISR(g_unusedFrameBufferQueue, &old_output_buffer, &xTaskWokenByReceive));
             // This should never block
         }
 
         // Try to recv the next buffer
-        frame_buffer_t frame_buffer;
+        frameBuffer_t frame_buffer;
 
-        if(xQueueReceiveFromISR(frame_buffer_queue, &frame_buffer, &xTaskWokenByReceive)) {
+        if(xQueueReceiveFromISR(g_frameBufferQueue, &frame_buffer, &xTaskWokenByReceive)) {
             gpio_put(16, false);
             // Got new buffer! -> recv buffer will be the next buffer
             next_output_buffer = frame_buffer;
@@ -79,7 +79,7 @@ static void __isr_dma() {
 void _dac_initPIO(PIO pio, uint sm, uint data_pin_start, uint control_pin_start) {
     // Get initial buffers
     {
-        frame_buffer_t first_buf;
+        frameBuffer_t first_buf;
         first_buf.size = BUFFER_SIZE;
         first_buf.buffer = &main_frame_buffers[0];
         current_output_buffer = first_buf;
@@ -130,7 +130,7 @@ void _dac_initPIO(PIO pio, uint sm, uint data_pin_start, uint control_pin_start)
             &main_frame_buffers[0], sizeof(main_frame_buffers[0])/2, true
         );
 
-        irq_set_exclusive_handler(DMA_IRQ_0, __isr_dma);
+        irq_set_exclusive_handler(DMA_IRQ_0, isrDma);
         dma_channel_set_irq0_enabled(dma_chan, true);
         irq_set_enabled(DMA_IRQ_0, true);
     }

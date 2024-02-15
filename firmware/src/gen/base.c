@@ -24,7 +24,7 @@ enum PARSER_STATE {
     READ_PARAM_LOW,
 };
 
-void gen_processInstruction(instructionBuffer_t instructions, frame_buffer_t target_frame_buffer) {
+void gen_processInstruction(instructionBuffer_t instructions, frameBuffer_t target_frame_buffer) {
     enum PARSER_STATE parse_state = READ_ID;
     uint param_count = 0;
     uint param_index = 0;

@@ -27,20 +27,20 @@ void dac_submitInstructions(uint8_t * instructions_list, size_t instructions_lis
     instruction_buffer.buffer = instructions_list;
     instruction_buffer.size = instructions_list_size;
     
-    while(!xQueueSend(instruction_buffer_queue, &instruction_buffer, DEFAULT_QUEUE_WAIT_DURATION));
+    while(!xQueueSend(g_instructionBufferQueue, &instruction_buffer, DEFAULT_QUEUE_WAIT_DURATION));
 };
 
 
 uint8_t * dac_acquireInstructionBufferPointer() {
     instructionBuffer_t instruction_buffer;
-    while(!xQueueReceive(unused_instruction_buffer_queue, &instruction_buffer, DEFAULT_QUEUE_WAIT_DURATION));
+    while(!xQueueReceive(g_unusedInstructionBufferQueue, &instruction_buffer, DEFAULT_QUEUE_WAIT_DURATION));
     return instruction_buffer.buffer;
 };
 
 /**
  * Task, that handles filling all queues should run with high priority
 */
-TaskHandle_t init_fill_queue_task;
+TaskHandle_t initFillQueueTask;
 
 /**
  * @brief Task function for init fill of queues
@@ -50,17 +50,17 @@ TaskHandle_t init_fill_queue_task;
  */
 static void initFillQueuesTaskFunction(void * param) {
     for(int i=0; i<GENERAL_QUEUE_SIZE; i++) {
-        frame_buffer_t new_frame_buffer;
-        new_frame_buffer.size = BUFFER_SIZE;
-        new_frame_buffer.buffer = &main_frame_buffers[i];
-        while(!xQueueSend(frame_buffer_queue, &new_frame_buffer, DEFAULT_QUEUE_WAIT_DURATION));
+        frameBuffer_t newFrameBuffer;
+        newFrameBuffer.size = BUFFER_SIZE;
+        newFrameBuffer.buffer = &main_frame_buffers[i];
+        while(!xQueueSend(g_frameBufferQueue, &newFrameBuffer, DEFAULT_QUEUE_WAIT_DURATION));
     }
 
     for(int i=0; i<GENERAL_QUEUE_SIZE-2; i++) {
         instructionBuffer_t new_instruction_buffer;
         new_instruction_buffer.size = 0;
         new_instruction_buffer.buffer = (uint8_t *)(&main_instruction_buffer[i]);
-        while(!xQueueSend(unused_instruction_buffer_queue, &new_instruction_buffer, DEFAULT_QUEUE_WAIT_DURATION));
+        while(!xQueueSend(g_unusedInstructionBufferQueue, &new_instruction_buffer, DEFAULT_QUEUE_WAIT_DURATION));
     }
 
     vTaskDelete(NULL);    
@@ -72,14 +72,14 @@ static void initFillQueuesTaskFunction(void * param) {
  */
 static void initTasks() {
     xTaskCreate(gen_processingTaskFunction, "Signal Process Task", 1024, NULL, 1, &processingJobTask);
-    xTaskCreate(initFillQueuesTaskFunction, "Init fill Queues", 64, NULL, 4, &init_fill_queue_task);
+    xTaskCreate(initFillQueuesTaskFunction, "Init fill Queues", 64, NULL, 4, &initFillQueueTask);
 }
 
 void dac_init(PIO pio, uint sm, uint data_pin_start, uint control_pin_start) {
-    unused_instruction_buffer_queue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(instructionBuffer_t));
-    instruction_buffer_queue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(instructionBuffer_t));
-    unused_frame_buffer_queue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(frame_buffer_t));
-    frame_buffer_queue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(frame_buffer_t));
+    g_unusedInstructionBufferQueue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(instructionBuffer_t));
+    g_instructionBufferQueue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(instructionBuffer_t));
+    g_unusedFrameBufferQueue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(frameBuffer_t));
+    g_frameBufferQueue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(frameBuffer_t));
 
 
     for(int i=0; i<GENERAL_QUEUE_SIZE; i++)
