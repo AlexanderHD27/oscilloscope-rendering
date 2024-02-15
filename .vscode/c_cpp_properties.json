@@ -3,7 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/firmware/src/**",
+                "${workspaceFolder}/firmware/include/**",
                 "${workspaceFolder}/firmware/lib/pico-sdk/lib/tinyusb/src"
             ],
             "defines": [],

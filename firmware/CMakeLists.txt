@@ -36,16 +36,19 @@ endif()
 add_executable(main
     src/main.c
 
-    src/dac/pregen.c
-    src/dac/gen.c
+    src/gen/base.c
+    src/gen/pregen.c
+    src/gen/gen.c
+    src/gen/util.c
+
     src/dac/driver.c
     src/dac/interface.c
     src/dac/globals.c
+    src/dac/processing.c
 )
 
 target_include_directories(main PUBLIC 
-    src/dac
-    src/gen
+    include/
 )
 
 # Add FreeRTOS

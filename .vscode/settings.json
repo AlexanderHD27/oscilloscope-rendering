@@ -5,6 +5,7 @@
         "apsel",
         "arrayname",
         "baseaddr",
+        "Bhaskra",
         "bitwidth",
         "cget",
         "channellist",
@@ -55,10 +56,13 @@
         "freertos.h": "c",
         "random": "c",
         "queue.h": "c",
-        "string_view": "c"
+        "string_view": "c",
+        "instructionformat.h": "c",
+        "includeglobals.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": false,
     "todo-tree.filtering.ignoreGitSubmodules": true,
     "todo-tree.tree.showBadges": true,
-    "terminal.integrated.scrollback": 10000
+    "terminal.integrated.scrollback": 10000,
+    "C_Cpp.refactoring.includeHeader": "always",
 }

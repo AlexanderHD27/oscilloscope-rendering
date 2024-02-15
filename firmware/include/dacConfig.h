@@ -1,5 +1,3 @@
-#define PIO_CLK_DIV(freq) (SYS_CLK_MHZ*1000000)/(freq)
-
 /** Configuration Stuff */
 
 #define BUFFER_SIZE 0x1000
@@ -10,6 +8,7 @@
 // How many bytes of instruction can be stored inside one instruction buffer
 #define INSTRUCTION_BUF_SIZE 128
 
+// How many FreeRTOS-Ticks a recv should take befor restarting
 #define DEFAULT_QUEUE_WAIT_DURATION 32
 
 // Frequency can be from 2 kHz to 133 MHz 

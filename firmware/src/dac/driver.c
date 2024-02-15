@@ -10,7 +10,7 @@
 #include "dac.pio.h"
 #include "dac.h"
 
-#include "include_globals.h"
+#include "includeGlobals.h"
 
 int dma_chan;
 
@@ -92,7 +92,7 @@ void __isr_dma() {
  * @param buffer_size who many X-Y points are contained in a frame
  * @param next_frame_handler Handler function, called after a frame swap occurred. Its parsed the used buffer, to modify/fill. This function should talk only short amount of time to execute
 */
-void __init_dac_driver(PIO pio, uint sm, uint data_pin_start, uint control_pin_start) {
+void _dac_initPIO(PIO pio, uint sm, uint data_pin_start, uint control_pin_start) {
     // Get initial buffers
     {
         frame_buffer_t first_buf;

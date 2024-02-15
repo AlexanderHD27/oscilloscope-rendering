@@ -9,7 +9,7 @@
  * @param buffer target buffer, that the signal is written to (note that the buffer needs at least size of 2*buffer_size)
  * @param buffer_size how big is your buffer
 */
-void pregen_calibration_cross(__uint16_t * buffer, size_t buffer_size) {
+void gen_pregenCalibrationCross(__uint16_t * buffer, size_t buffer_size) {
     uint16_t y0 = 0;
     uint16_t y1 = 0;
     volatile int x_sec = 0;
@@ -49,12 +49,12 @@ void pregen_calibration_cross(__uint16_t * buffer, size_t buffer_size) {
  * @param amp_x amplitude of x-signal (1 = max signal strength)
  * @param amp_y amplitude of y-signal (1 = max signal strength)
 */
-void gen_sins(__uint16_t * buffer, size_t buffer_size, 
+void gen_pregenSine(__uint16_t * buffer, size_t buffer_size, 
     float freq_x, float freq_y, 
     float phase_x, float phase_y, 
     float amp_x, float y_amp
 ) {
-    // TODO: Implement gen_sins()
+    // TODO: Implement dac_pregenSine()
 }
 
 /**
@@ -62,7 +62,7 @@ void gen_sins(__uint16_t * buffer, size_t buffer_size,
  * @param buffer target buffer, that the signal is written to (note that the buffer needs at least size of 2*buffer_size)
  * @param buffer_size sample size of your buffer
 */
-void pregen_chirp(uint16_t * buffer, size_t buffer_size) {
+void gen_pregenChirp(uint16_t * buffer, size_t buffer_size) {
     float steps = UINT16_MAX / buffer_size;
     uint16_t x = 0;
 
@@ -78,7 +78,7 @@ void pregen_chirp(uint16_t * buffer, size_t buffer_size) {
  * @param buffer the target, that the signal is written two (note that the buffer needs at least size of 2*buffer_size)
  * @param buffer_size sample size of your buffer
 */
-void pregen_rect(__uint16_t * buffer, size_t buffer_size,
+void gen_pregenRect(__uint16_t * buffer, size_t buffer_size,
     uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1
 ) {
     // 4/5 Line, 1/5 Point
@@ -132,7 +132,7 @@ void pregen_rect(__uint16_t * buffer, size_t buffer_size,
  * @param buffer the target, that the signal is written two (note that the buffer needs at least size of 2*buffer_size)
  * @param buffer_size sample size of your buffer
 */
-void pregen_square_wave(__uint16_t * buffer, size_t buffer_size) {
+void gen_pregenSquareWave(__uint16_t * buffer, size_t buffer_size) {
     uint16_t x;
     for(size_t i=0; i<buffer_size; i++) {
         x = 0xffff * (i & 0b1);
