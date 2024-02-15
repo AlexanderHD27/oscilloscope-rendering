@@ -1,3 +1,14 @@
+/**
+ * @file main.c
+ * @author AlexanderHD27 (you@domain.com)
+ * @brief Main file of the RPi Pico Firmware for the Oscilloscope-Renderer
+ * @version 0.1
+ * @date 2024-02-15
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

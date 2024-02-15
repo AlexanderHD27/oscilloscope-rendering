@@ -1,11 +1,20 @@
+/**
+ * @file gen.c
+ * @author Alexander
+ * @brief This contains function regarding generation of different signals (sine, cubic, quadratic, line, const)
+ * @version 0.1
+ * @date 2024-02-15
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
 #include "pico/stdlib.h"
 #include "gen.h"
-
-// This contains function regarding generation of different signals (sine, cubic, quadratic, line, const)
 
 // I'm using fixed point notation, because the RP2040 has no FPU and these calculation bust be quick to compute
 
 // signed [s][15].[16]
+
 #define SFP_SHIFT 15
 typedef int32_t fixedPoint_int;
 #define SFP_FROM_UINT(x) ((fixedPoint_int)(x) << SFP_SHIFT)
@@ -13,20 +22,24 @@ typedef int32_t fixedPoint_int;
 #define SFP_DIV(x, y) (fixedPoint_int)((x << SFP_SHIFT) / y)
 
 // unsigned [16].[16]
+
 typedef uint32_t fixedPoint_uint;
 #define FP_SHIFT 16
 #define FP_FROM_UINT(x) ((fixedPoint_uint)(x) << FP_SHIFT)
 #define FP_FROM_FLOAT(x) ((fixedPoint_uint)(x * (1 << FP_SHIFT)))
 
 // These two implementation of fixpoint multiplication/division worked in most case but sadly not in all (e.g. Taylor-Approximation)
+
 #define FP_MUL_UINT32(x, y) (((x*y)) >> FP_SHIFT)
 #define FP_DIV_UINT32(x, y) ((x << FP_SHIFT)/y)
 
 // This is more expensive, because we need more bits to calculate
+
 #define FP_MUL(x, y) ((fixedPoint_uint)((((uint64_t)(x)) * ((uint64_t)(y))) >> FP_SHIFT))
 #define FP_DIV(x, y) ((((uint64_t)(x)) << FP_SHIFT) / ((uint64_t)(y)))
 
 // More Complex generation function
+
 void gen_generateLine(instruction_t ins, uint16_t * buffer) {
     fixedPoint_int from = SFP_FROM_UINT(ins.param[PARAM_LINE_FROM_VALUE]);
     fixedPoint_int to   = SFP_FROM_UINT(ins.param[PARAM_LINE_TO_VALUE]);
@@ -40,8 +53,6 @@ void gen_generateLine(instruction_t ins, uint16_t * buffer) {
     }
 }
 
-// This is to slow -> use of fixpoint notation
-// 79,2 ms for 4096 Samples (2 channels)
 void gen_generateQuadraticFloat(instruction_t ins, uint16_t * buffer) {
     float x, y, c0, c1, c2;
     float p0 = (float)(ins.param[PARAM_QUADRATIC_P0])/0xffff;
@@ -60,8 +71,6 @@ void gen_generateQuadraticFloat(instruction_t ins, uint16_t * buffer) {
     }
 }
 
-// This takes ~17.0ms to compute for 4096 Samples (2 Channels)
-// See https://www.desmos.com/calculator/lqwrsq6pdb
 void gen_generateQuadratic(instruction_t ins, uint16_t * buffer) {
     // TODO: c0 is symmetric to c2, this can optimized further
     fixedPoint_uint x, y, c0, c1, c2;
@@ -82,8 +91,6 @@ void gen_generateQuadratic(instruction_t ins, uint16_t * buffer) {
     }
 }
 
-// This takes ~17.0ms to compute for 4096 Samples (2 Channels)
-// See https://www.desmos.com/calculator/usunemqqbi
 void gen_generateCubic(instruction_t ins, uint16_t * buffer) {
     // TODO: c0, c1 are symmetric to c2, c3, this can optimized further
     fixedPoint_uint x, x_inv, y, c0, c1, c2, c3, q;
@@ -110,10 +117,11 @@ void gen_generateCubic(instruction_t ins, uint16_t * buffer) {
     }
 }
 
-// Using Bhaskra I's Approximation (Its bad)
-// see https://www.desmos.com/calculator/3tu2pwap4c
+// 
+// 
 
 // unsigned [19].[13]
+
 #define FIX_POINT_SINE_SHIFT 13
 #define FIX_POINT_SINE_CONV_SHIFT (FP_SHIFT - FIX_POINT_SINE_SHIFT)
 
@@ -148,10 +156,6 @@ void gen_generateSineBhaskra(instruction_t ins, uint16_t * buffer) {
 #define SINE_FACTOR_1 FP_FROM_FLOAT(HALF_PI)
 #define SINE_FACTOR_3 FP_FROM_FLOAT(PRE_POWER_3(HALF_PI)/(6))
 #define SINE_FACTOR_5 FP_FROM_FLOAT(PRE_POWER_5(HALF_PI)/(120)) // This -0x12f is a correction factor, due to probably rounding errors
-
-// This uses taylor-series to approx. a sin wave. Its reasonable accurate, but takes longer to computer
-// see https://www.desmos.com/calculator/77trwqesdm
-// This takes ~65.9ms to compute for 4096 Samples (2 Channels) (This is too slow)
 
 void gen_generateSineTaylor(instruction_t ins, uint16_t * buffer) {
     fixedPoint_uint x, x2, x3, x5, c1, c3, c5, y_out;

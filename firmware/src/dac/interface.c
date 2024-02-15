@@ -1,3 +1,13 @@
+/**
+ * @file interface.c
+ * @author AlexanderHD27
+ * @brief Contains Code regarding Setup and Initialisation
+ * @version 0.1
+ * @date 2024-02-15
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
 
@@ -10,7 +20,7 @@
 #include "includeGlobals.h"
 
 // from globals.c
-extern TaskHandle_t processing_job_task;
+extern TaskHandle_t processingJobTask;
 
 void dac_submitInstructions(uint8_t * instructions_list, size_t instructions_list_size) {
     instructionBuffer_t instruction_buffer;
@@ -32,7 +42,13 @@ uint8_t * dac_acquireInstructionBufferPointer() {
 */
 TaskHandle_t init_fill_queue_task;
 
-void init_fill_queues_task_function(void * param) {
+/**
+ * @brief Task function for init fill of queues
+ * see DataFlow Diagram
+ * 
+ * @param param Not used, can be ignored
+ */
+static void initFillQueuesTaskFunction(void * param) {
     for(int i=0; i<GENERAL_QUEUE_SIZE; i++) {
         frame_buffer_t new_frame_buffer;
         new_frame_buffer.size = BUFFER_SIZE;
@@ -50,8 +66,13 @@ void init_fill_queues_task_function(void * param) {
     vTaskDelete(NULL);    
 }
 
-void __init_tasks() {
-    xTaskCreate(gen_processingTaskFunction, "Signal Process Task", 1024, NULL, 1, &processing_job_task);
+/**
+ * @brief Inits and start all relevant task
+ * Internally used
+ */
+static void initTasks() {
+    xTaskCreate(gen_processingTaskFunction, "Signal Process Task", 1024, NULL, 1, &processingJobTask);
+    xTaskCreate(initFillQueuesTaskFunction, "Init fill Queues", 64, NULL, 4, &init_fill_queue_task);
 }
 
 void dac_init(PIO pio, uint sm, uint data_pin_start, uint control_pin_start) {
@@ -60,11 +81,10 @@ void dac_init(PIO pio, uint sm, uint data_pin_start, uint control_pin_start) {
     unused_frame_buffer_queue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(frame_buffer_t));
     frame_buffer_queue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(frame_buffer_t));
 
-    xTaskCreate(init_fill_queues_task_function, "Init fill Queues", 64, NULL, 4, &init_fill_queue_task);
 
     for(int i=0; i<GENERAL_QUEUE_SIZE; i++)
         gen_pregenCalibrationCross(main_frame_buffers[i], BUFFER_SIZE);
 
-    __init_tasks();
+    initTasks();
     _dac_initPIO(pio, sm, data_pin_start, control_pin_start);
 }

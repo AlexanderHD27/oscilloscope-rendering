@@ -4,9 +4,6 @@
 #include "gen.h"
 #include "includeGlobals.h"
 
-/**
- * handles the processing/signal generation part. It should run on core1
-*/
 void gen_processingTaskFunction(void * param) {
     instructionBuffer_t new_instruction_buffer;
     frame_buffer_t new_frame_buffer;

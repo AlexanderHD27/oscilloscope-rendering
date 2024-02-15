@@ -1,3 +1,14 @@
+/**
+ * @file driver.c
+ * @author AlexanderHD27
+ * @brief Contains Driver Code to get PIO and DMA running
+ * @version 0.1
+ * @date 2024-02-15
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
+
 #include "hardware/pio.h"
 #include "hardware/irq.h"
 #include "hardware/dma.h"
@@ -19,11 +30,13 @@ frame_buffer_t current_output_buffer;
 frame_buffer_t next_output_buffer;
 
 /**
+ * @brief Interrupt service routine called when PIO finishes a frame
+ * 
  * Called every time a frame is finished
  * It acks the irq, set the new buffer for the dma-channel to read, flips the current used buffer marker
  * This should be set as isr for dma
 */ 
-void __isr_dma() {
+static void __isr_dma() {
     static uint repeat_counter = 0;
 
     if(repeat_counter == 0) { // Every FRAME_REPEATS cycles, the frame is updated
@@ -63,35 +76,6 @@ void __isr_dma() {
     repeat_counter = (repeat_counter + 1) % FRAME_REPEAT;
 }
 
-/**
- * 
- * @brief Configures and starts PIO State machines to create the signal for the DACs.
- * This driver use one PIO core and one State machine
- *
- * Pin Layout:
- *      Data Pins: 0-7 (Reverse order)
- *      Control Pins:
- *          0 pre-register LE
- *          1 Sel_A (High or Lower 8 bits) Inverted
- *          2 Sel_B (X or Y Channel) Inverted
- *          3 Master LE
- * 
- * 
- * Buffer is layout as { X0, Y0, X1, X1, ... }
- * This means that a buffer needs to have size of 2*buffer_size (buffer_size is referring to the number of samples it has)
- * The buffer is not passed directly, but as pointer to the array (uint16_t (* buffer_a)[]), such that the buffer can be swap
- * for another without coping data around. Or put this: the pointer to the pointer to the data is a passed
- * The Buffer pointers are store in a global variable, so make sure that these pointers do not go out of scope
- * 
- * @param pio either pio0 or pio1
- * @param sm pio state machine used
- * @param control_pin_start starting offset for the control pins (in total 4 control bins are used)
- * @param data_pin_start starting offset for data connection (in total 8 data pins are used)
- * @param buffer_a pointer to output buffer A (the buffer needs to be of size 2*buffer_size)
- * @param buffer_b pointer to output buffer B (the buffer needs to be of size 2*buffer_size)
- * @param buffer_size who many X-Y points are contained in a frame
- * @param next_frame_handler Handler function, called after a frame swap occurred. Its parsed the used buffer, to modify/fill. This function should talk only short amount of time to execute
-*/
 void _dac_initPIO(PIO pio, uint sm, uint data_pin_start, uint control_pin_start) {
     // Get initial buffers
     {

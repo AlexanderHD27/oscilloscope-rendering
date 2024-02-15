@@ -1,3 +1,13 @@
+/**
+ * @file util.c
+ * @author AlexanderHD27
+ * @brief Testing functions for adding instruction to instruction list
+ * @version 0.1
+ * @date 2024-02-15
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
 #include "dac.h"
 #include "instructionFormat.h"
 

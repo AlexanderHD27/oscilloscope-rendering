@@ -1,14 +1,21 @@
+/**
+ * @file pregen.c
+ * @author AlexanderHD27
+ * @brief Contains function that pre-fill a buffer, with different types of signal
+ * @version 0.1
+ * @date 2024-02-15
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ * None the functions in this fill are optimized and cannot be used for real-time-processing
+ * 
+ */
 #include "pico/stdlib.h"
 #include <stdlib.h>
 #include <math.h>
 
 #include "dac.h"
 
-/**
- * Pregenerate a circle + cross + point for calibration/testing. This should not be used for live-generation
- * @param buffer target buffer, that the signal is written to (note that the buffer needs at least size of 2*buffer_size)
- * @param buffer_size how big is your buffer
-*/
 void gen_pregenCalibrationCross(__uint16_t * buffer, size_t buffer_size) {
     uint16_t y0 = 0;
     uint16_t y1 = 0;
@@ -38,17 +45,6 @@ void gen_pregenCalibrationCross(__uint16_t * buffer, size_t buffer_size) {
 }
 
 
-/**
- * Generates two sin-waves with corrsponding parameters
- * @param buffer target buffer, that the signal is written to (note that the buffer needs at least size of 2*buffer_size)
- * @param buffer_size how big is your buffer
- * @param freq_x frequency of the x-signal in 1/buffer_period
- * @param freq_y frequency of the y-signal in 1/buffer_period
- * @param phase_x phase-shift of the x-signal
- * @param phase_y phase-shift of the y-signal
- * @param amp_x amplitude of x-signal (1 = max signal strength)
- * @param amp_y amplitude of y-signal (1 = max signal strength)
-*/
 void gen_pregenSine(__uint16_t * buffer, size_t buffer_size, 
     float freq_x, float freq_y, 
     float phase_x, float phase_y, 
@@ -57,11 +53,6 @@ void gen_pregenSine(__uint16_t * buffer, size_t buffer_size,
     // TODO: Implement dac_pregenSine()
 }
 
-/**
- * Generates two chirps from -1 to +1 with a period of the buffer size
- * @param buffer target buffer, that the signal is written to (note that the buffer needs at least size of 2*buffer_size)
- * @param buffer_size sample size of your buffer
-*/
 void gen_pregenChirp(uint16_t * buffer, size_t buffer_size) {
     float steps = UINT16_MAX / buffer_size;
     uint16_t x = 0;
@@ -73,11 +64,6 @@ void gen_pregenChirp(uint16_t * buffer, size_t buffer_size) {
     }
 }
 
-/**
- * Generates a rectangle from (x0, y0) to (x1, y1). Uses the whole buff_size for generation
- * @param buffer the target, that the signal is written two (note that the buffer needs at least size of 2*buffer_size)
- * @param buffer_size sample size of your buffer
-*/
 void gen_pregenRect(__uint16_t * buffer, size_t buffer_size,
     uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1
 ) {
@@ -127,11 +113,6 @@ void gen_pregenRect(__uint16_t * buffer, size_t buffer_size,
     }
 }
 
-/**
- * Generates a two square at maximum frequency (the y channel is inverted)
- * @param buffer the target, that the signal is written two (note that the buffer needs at least size of 2*buffer_size)
- * @param buffer_size sample size of your buffer
-*/
 void gen_pregenSquareWave(__uint16_t * buffer, size_t buffer_size) {
     uint16_t x;
     for(size_t i=0; i<buffer_size; i++) {

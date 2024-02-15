@@ -1,3 +1,14 @@
+/**
+ * @file includeGlobals.h
+ * @author AlexanderHD27
+ * @brief Contains includes for queues and pre-allocated buffers for frame and instruction
+ * @version 0.1
+ * @date 2024-02-15
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
+
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
 #include "queue.h"

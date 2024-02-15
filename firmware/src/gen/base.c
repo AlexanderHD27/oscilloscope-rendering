@@ -1,3 +1,14 @@
+/**
+ * @file base.c
+ * @author AlexanderHd27
+ * @brief Contains Code that parses a Instruction (List)
+ * @version 0.1
+ * @date 2024-02-15
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
+
 #include "pico/stdlib.h"
 #include "dac.h"
 #include "gen.h"
@@ -13,10 +24,6 @@ enum PARSER_STATE {
     READ_PARAM_LOW,
 };
 
-/**
- * Process on job
- * TODO: Implement signal generation function
-*/
 void gen_processInstruction(instructionBuffer_t instructions, frame_buffer_t target_frame_buffer) {
     enum PARSER_STATE parse_state = READ_ID;
     uint param_count = 0;
