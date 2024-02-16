@@ -44,4 +44,4 @@ Yellow: X-Channel, Blue: Y-Channel, Magenta: Digital Input Signal to the DAC. (Y
 For testing the optics I did use a Hameg MH 312 Oscilloscope (I got this one used from Kleinanzeigen, so its already falling apart: semi-broken Coupling-switch, not being able focus the beam correctly, X-Pos nob falling off all the time)
 
 ### Further Components
-- [Firmware](./firmware/README.md)
+- [Firmware](./firmware/README.md): Documentation is done by [doxygen](https://www.mintcalc.com/projects/osci-rendering/docs/index.html)
