@@ -1,5 +1,6 @@
 Firmware for the RPi Pico for Oscilloscope Renderer
 
+
 ## Introduction
 The Firmware handles data and pushes it to the DACs resulting in a signal for the oscilloscope to be display on.
 
