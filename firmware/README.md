@@ -16,7 +16,27 @@ This Project is developed with VSCode
 
 ### Setup
 The VSCode project comes pre-configured is self contained (FreeRTOS, PicoSDK).
-But the appropriate tools like gcc, gdb and openocd need to be installed:
+But the appropriate tools like gcc, gdb and openocd need to be installed.
+You could also use docker to build the project
+
+#### Docker
+For this you only need docker to be installed
+
+Building the container
+```sh
+docker build -t rpi_pico_build ./firmware/docker
+```
+
+Running the docs: firmware
+```sh
+docker run -v "./":/data --rm rpi_pico_build "/data/firmware/docker/build_docs.sh"
+```
+
+Running the build: firmware
+```sh
+docker run -v "./":/data --rm rpi_pico_build "/data/firmware/docker/build_firmware.sh"
+```
+
 
 #### Installing the Build tools
 ```sh

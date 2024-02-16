@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Including the SDK (must be before project)
-SET(PICO_SDK_PATH "/home/alexander/Projects/oscilloscope-rendering/firmware/lib/pico-sdk")
+
+if (NOT "$ENV{PICO_SDK_PATH_OVERRIDE}" STREQUAL "")
+    SET(PICO_SDK_PATH "$ENV{PICO_SDK_PATH_OVERRIDE}")
+else()
+    SET(PICO_SDK_PATH "/home/alexander/Projects/oscilloscope-rendering/firmware/lib/pico-sdk")
+endif()
+
 SET(PICO_TOOLCHAIN_PATH $PICO_SDK_PATH/cmake/preload/toolchains/)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "$<1:${CMAKE_BINARY_DIR}/bin>")
 
