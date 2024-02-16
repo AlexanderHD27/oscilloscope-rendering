@@ -27,42 +27,46 @@ pipeline {
             }
         }
         
-        stage('build firmware') {
-            agent {
-                docker { 
-                    image 'rpi_pico_build_container'
-                    label 'docker'
-                    reuseNode true
-                }
-            }
-            
-            steps {
-                script {
-                    env.PICO_SDK_PATH_OVERRIDE = sh(script: 'echo $PWD/firmware/lib/pico-sdk', returnStdout: true).trim()
+        stage('build') {
+            parallel {
+                stage('build firmware') {
+                    agent {
+                        docker { 
+                            image 'rpi_pico_build_container'
+                            label 'docker'
+                            reuseNode true
+                        }
+                    }
+                    
+                    steps {
+                        script {
+                            env.PICO_SDK_PATH_OVERRIDE = sh(script: 'echo $PWD/firmware/lib/pico-sdk', returnStdout: true).trim()
+                        }
+                        
+                        dir('firmware/build') {
+                            sh 'echo building in $PWD'
+                            sh 'rm -rf *'
+                            sh 'echo PicoSDK path: $PICO_SDK_PATH_OVERRIDE'
+                            sh 'cmake ..'
+                            sh 'cmake --build . --config Debug'
+                            sh 'make -j4 all'
+                        }
+                    }
                 }
                 
-                dir('firmware/build') {
-                    sh 'echo building in $PWD'
-                    sh 'rm -rf *'
-                    sh 'echo PicoSDK path: $PICO_SDK_PATH_OVERRIDE'
-                    sh 'cmake ..'
-                    sh 'cmake --build . --config Debug'
-                    sh 'make -j4 all'
+                stage('build docs') {
+                    agent {
+                        docker { 
+                            image 'rpi_pico_build_container'
+                            label 'docker'
+                            reuseNode true
+                        }
+                    }
+                    
+                    steps {
+                        sh "doxygen firmware/docs/Doxyfile"
+                    }
                 }
-            }
-        }
-        
-        stage('build docs') {
-            agent {
-                docker { 
-                    image 'rpi_pico_build_container'
-                    label 'docker'
-                    reuseNode true
-                }
-            }
-            
-            steps {
-                sh "doxygen firmware/docs/Doxyfile"
             }
         }
     }
