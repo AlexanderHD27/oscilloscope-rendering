@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Including the SDK (must be before project)
-SET(PICO_SDK_PATH "/home/alexander/Projects/oscilloscope-rendering/firmware/lib/pico-sdk")
+
+if (NOT "$ENV{PICO_SDK_PATH_OVERRIDE}" STREQUAL "")
+    SET(PICO_SDK_PATH "$ENV{PICO_SDK_PATH_OVERRIDE}")
+else()
+    SET(PICO_SDK_PATH "/home/alexander/Projects/oscilloscope-rendering/firmware/lib/pico-sdk")
+endif()
+
 SET(PICO_TOOLCHAIN_PATH $PICO_SDK_PATH/cmake/preload/toolchains/)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "$<1:${CMAKE_BINARY_DIR}/bin>")
 
@@ -36,16 +42,19 @@ endif()
 add_executable(main
     src/main.c
 
-    src/dac/pregen.c
-    src/dac/gen.c
+    src/gen/base.c
+    src/gen/pregen.c
+    src/gen/gen.c
+    src/gen/util.c
+
     src/dac/driver.c
     src/dac/interface.c
     src/dac/globals.c
+    src/dac/processing.c
 )
 
 target_include_directories(main PUBLIC 
-    src/dac
-    src/gen
+    include/
 )
 
 # Add FreeRTOS

@@ -11,7 +11,12 @@
 
 - [ ] USB Interface
     - [ ] Raw Interface (sending raw buffers)
-    - [ ] Compressed Interfaces (Line, Points, Spline, Sin)
+    - [X] Compressed Interfaces (Line, Points, Spline, Sin)
+
+- [X] DevOps
+    - [X] Setup Jenkins
+    - [X] Pipeline for Building Firmware
+    - [X] Pipeline for Building and Deploing docs
 
 - [ ] Rendering 
     - [ ] 3D-Cube  

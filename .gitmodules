@@ -9,3 +9,11 @@
 [submodule "firmware/lib/FreeRTOS-Kernel"]
 	path = firmware/lib/FreeRTOS-Kernel
 	url = https://github.com/FreeRTOS/FreeRTOS-Kernel
+
+[submodule "firmware/lib/doxygen-awesome-css"]
+	path = firmware/lib/doxygen-awesome-css
+	url = https://github.com/jothepro/doxygen-awesome-css.git
+
+[submodule "circuits/lib/KiCad-RP-Pico"]
+	path = circuits/lib/KiCad-RP-Pico
+	url = https://github.com/ncarandini/KiCad-RP-Pico.git

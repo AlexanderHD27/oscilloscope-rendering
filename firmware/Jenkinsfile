@@ -1,0 +1,106 @@
+pipeline {
+    agent none
+
+    stages {
+        stage('git checkout') {
+            agent {
+                label 'docker'
+            }
+            
+            steps {
+                git branch: 'firmware-dev',
+                    credentialsId: 'osci-rendering_github',
+                    url: 'git@github.com:AlexanderHD27/oscilloscope-drawing.git'
+                
+                sh 'git submodule update --init --recursive'
+                sh "ls -laF"
+                stash includes: "firmware/lib/doxygen-awesome-css/**", name: 'libs-doxygen' 
+            }
+        }
+        
+        stage('build build-container') {
+            agent {
+                label 'docker'
+            }
+            
+            steps {
+                sh 'docker build -t rpi_pico_build_container firmware/docker/'
+            }
+        }
+        
+        stage('build') {
+            parallel {
+                stage('build firmware') {
+                    agent {
+                        docker { 
+                            image 'rpi_pico_build_container'
+                            label 'docker'
+                            reuseNode true
+                        }
+                    }
+                    
+                    steps {
+                        script {
+                            env.PICO_SDK_PATH_OVERRIDE = sh(script: 'echo $PWD/firmware/lib/pico-sdk', returnStdout: true).trim()
+                        }
+                        
+                        dir('firmware/build') {
+                            sh 'echo building in $PWD'
+                            sh 'rm -rf *'
+                            sh 'echo PicoSDK path: $PICO_SDK_PATH_OVERRIDE'
+                            sh 'cmake ..'
+                            sh 'cmake --build . --config Debug'
+                            sh 'make -j4 all'                           
+                        }
+
+                        stash includes: "firmware/build/bin/*", name: 'binary'
+                    }
+                }
+                
+                stage('build docs') {
+                    agent {
+                        docker { 
+                            image 'rpi_pico_build_container'
+                            label 'docker'
+                            reuseNode true
+                        }
+                    }
+                    
+                    steps {
+                        unstash 'libs-doxygen'
+                        sh "doxygen firmware/docs/Doxyfile"
+                        stash includes: "firmware/docs/html/*", name: 'html-docs'
+                    }
+                }
+            }
+        }
+
+        stage('publish') {
+            parallel {
+                stage('publish docs') {
+                    agent {
+                        label 'cdc-deploy'
+                    }
+
+                    steps {
+                        sh 'rm -rf /www/projects/osci-rendering/docs/*'
+                        unstash 'html-docs'
+                        sh 'cp -r firmware/docs/html/* /www/projects/osci-rendering/docs'
+                    }
+                }
+
+                stage('publish binary') {
+                    agent {
+                        label 'cdc-deploy'
+                    }
+
+                    steps {
+                        sh 'rm -rf /www/projects/osci-rendering/bin/*'
+                        unstash 'binary'
+                        sh 'cp -r bin/* /www/projects/osci-rendering/bin'
+                    }
+                }
+            }
+        }
+    }
+}

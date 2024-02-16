@@ -157,5 +157,15 @@
             "label": "CMake: Configure",
             "command": "configure"
         },
+        {
+            "type": "shell",
+            "label": "Doxygen: Generate Docs",
+            "command": [
+                "doxygen ./firmware/docs/Doxyfile",
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            }
+        }
     ]
 }
