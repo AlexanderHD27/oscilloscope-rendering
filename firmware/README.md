@@ -1,5 +1,7 @@
 Firmware for the RPi Pico for Oscilloscope Renderer
 
+## Downloads
+[main.elf](https://www.mintcalc.com/projects/osci-rendering/bin/main.elf)
 
 ## Introduction
 The Firmware handles data and pushes it to the DACs resulting in a signal for the oscilloscope to be display on.
