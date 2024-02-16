@@ -50,8 +50,10 @@ pipeline {
                             sh 'cmake ..'
                             sh 'cmake --build . --config Debug'
                             sh 'make -j4 all'
-                            stash includes: "bin/*", name: 'binary'
+                            
                         }
+
+                        stash includes: "firmware/build/bin/*", name: 'binary'
                     }
                 }
                 
@@ -80,8 +82,9 @@ pipeline {
                     }
 
                     steps {
+                        sh 'rm -rf /www/projects/osci-rendering/docs/*'
                         unstash 'html-docs'
-                        sh 'cp -r * /www/projects/osci-rendering/docs'
+                        sh 'cp -r firmware/docs/html/* /www/projects/osci-rendering/docs'
                     }
                 }
 
@@ -91,8 +94,9 @@ pipeline {
                     }
 
                     steps {
+                        sh 'rm -rf /www/projects/osci-rendering/bin/*'
                         unstash 'binary'
-                        sh 'cp -r * /www/projects/osci-rendering/bin'
+                        sh 'cp -r bin/* /www/projects/osci-rendering/bin'
                     }
                 }
             }
