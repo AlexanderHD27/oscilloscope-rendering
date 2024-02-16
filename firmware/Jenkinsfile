@@ -12,7 +12,6 @@ pipeline {
                     credentialsId: 'osci-rendering_github',
                     url: 'git@github.com:AlexanderHD27/oscilloscope-drawing.git'
                 
-                sh 'git submodule update --init --recursive'
                 sh "ls -laF"
             }
         }
@@ -31,6 +30,8 @@ pipeline {
             parallel {
                 stage('build firmware') {
                     agent {
+                        sh 'git submodule update --init --recursive'
+
                         docker { 
                             image 'rpi_pico_build_container'
                             label 'docker'
@@ -39,6 +40,8 @@ pipeline {
                     }
                     
                     steps {
+                        sh 'git submodule update --init --recursive'
+
                         script {
                             env.PICO_SDK_PATH_OVERRIDE = sh(script: 'echo $PWD/firmware/lib/pico-sdk', returnStdout: true).trim()
                         }
@@ -53,7 +56,7 @@ pipeline {
                             
                         }
 
-                        stash includes: "firmware/build/bin/*", name: 'binary'
+                        stash includes: "firmware/build/bin/**", name: 'binary'
                     }
                 }
                 
@@ -68,7 +71,7 @@ pipeline {
                     
                     steps {
                         sh "doxygen firmware/docs/Doxyfile"
-                        stash includes: "firmware/docs/html/*", name: 'html-docs'
+                        stash includes: "firmware/docs/html/**", name: 'html-docs'
                     }
                 }
             }
