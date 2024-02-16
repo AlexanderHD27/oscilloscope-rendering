@@ -50,6 +50,7 @@ pipeline {
                             sh 'cmake ..'
                             sh 'cmake --build . --config Debug'
                             sh 'make -j4 all'
+                            stash includes: "bin/*", name: 'binary'
                         }
                     }
                 }
@@ -65,6 +66,7 @@ pipeline {
                     
                     steps {
                         sh "doxygen firmware/docs/Doxyfile"
+                        stash includes: "firmware/docs/html/*", name: 'html-docs'
                     }
                 }
             }
@@ -78,7 +80,8 @@ pipeline {
                     }
 
                     steps {
-                        sh 'cp -r firmware/docs/html/* /www/projects/osci-rendering/docs'
+                        unstash 'html-docs'
+                        sh 'cp -r * /www/projects/osci-rendering/docs'
                     }
                 }
 
@@ -88,7 +91,8 @@ pipeline {
                     }
 
                     steps {
-                        sh 'cp -r firmware/build/bin/* /www/projects/osci-rendering/bin'
+                        unstash 'binary'
+                        sh 'cp -r * /www/projects/osci-rendering/bin'
                     }
                 }
             }
