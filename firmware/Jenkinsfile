@@ -53,7 +53,7 @@ pipeline {
                             
                         }
 
-                        stash includes: "firmware/build/bin/*", name: 'binary'
+                        stash includes: "firmware/build/bin/**", name: 'binary'
                     }
                 }
                 
@@ -68,7 +68,7 @@ pipeline {
                     
                     steps {
                         sh "doxygen firmware/docs/Doxyfile"
-                        stash includes: "firmware/docs/html/*", name: 'html-docs'
+                        stash includes: "firmware/docs/html/**", name: 'html-docs'
                     }
                 }
             }
