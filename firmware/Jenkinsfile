@@ -8,7 +8,7 @@ pipeline {
             }
             
             steps {
-                git branch: 'feature-add-jenkins',
+                git branch: 'firmware-dev',
                     credentialsId: 'osci-rendering_github',
                     url: 'git@github.com:AlexanderHD27/oscilloscope-drawing.git'
                 
