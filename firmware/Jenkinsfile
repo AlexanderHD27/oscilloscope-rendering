@@ -69,5 +69,25 @@ pipeline {
                 }
             }
         }
+
+        stage('publish') {
+            agent {
+                label 'cdc-deploy'
+            }
+
+            parallel {
+                stage('publish docs') {
+                    steps {
+                        sh 'cp -r firmware/docs/html/* /www/projects/osci-rendering/docs'
+                    }
+                }
+
+                stage('publish binary') {
+                    steps {
+                        sh 'cp -r firmware/build/bin/* /www/projects/osci-rendering/bin'
+                    }
+                }
+            }
+        }
     }
 }
