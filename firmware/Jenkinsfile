@@ -1,0 +1,69 @@
+pipeline {
+    agent none
+
+    stages {
+        stage('git checkout') {
+            agent {
+                label 'docker'
+            }
+            
+            steps {
+                git branch: 'feature-add-jenkins',
+                    credentialsId: 'osci-rendering_github',
+                    url: 'git@github.com:AlexanderHD27/oscilloscope-drawing.git'
+                
+                sh 'git submodule update --init --recursive'
+                sh "ls -laF"
+            }
+        }
+        
+        stage('build build-container') {
+            agent {
+                label 'docker'
+            }
+            
+            steps {
+                sh 'docker build -t rpi_pico_build_container firmware/docker/'
+            }
+        }
+        
+        stage('build firmware') {
+            agent {
+                docker { 
+                    image 'rpi_pico_build_container'
+                    label 'docker'
+                    reuseNode true
+                }
+            }
+            
+            steps {
+                script {
+                    env.PICO_SDK_PATH_OVERRIDE = sh(script: 'echo $PWD/firmware/lib/pico-sdk', returnStdout: true).trim()
+                }
+                
+                dir('firmware/build') {
+                    sh 'echo building in $PWD'
+                    sh 'rm -rf *'
+                    sh 'echo PicoSDK path: $PICO_SDK_PATH_OVERRIDE'
+                    sh 'cmake ..'
+                    sh 'cmake --build . --config Debug'
+                    sh 'make -j4 all'
+                }
+            }
+        }
+        
+        stage('build docs') {
+            agent {
+                docker { 
+                    image 'rpi_pico_build_container'
+                    label 'docker'
+                    reuseNode true
+                }
+            }
+            
+            steps {
+                sh "doxygen firmware/docs/Doxyfile"
+            }
+        }
+    }
+}
