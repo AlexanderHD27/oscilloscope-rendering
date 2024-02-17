@@ -1,0 +1,27 @@
+{
+  "name": "disthub",
+  "version": "1.0.0",
+  "description": "Media/Rendering Distrubtion for osci-rendering",
+  "main": "src/main.ts",
+  "author": "AlexanderHD27",
+  "license": "MIT",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "eslint": "^8.0.1",
+    "eslint-config-standard-with-typescript": "^43.0.1",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
+    "eslint-plugin-promise": "^6.0.0",
+    "tsx": "^4.7.1",
+    "typescript": "*",
+    "typescript-eslint": "^7.0.1"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "scripts": {
+    "lint": "npx eslint src --ext .ts",
+    "build": "npx tsx --tsconfig ./tsconfig.json",
+    "dev": "npx tsx watch --tsconfig ./tsconfig.json ./src/main.ts"
+  }
+}
