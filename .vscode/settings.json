@@ -36,6 +36,7 @@
         "pindirs",
         "pinout",
         "pregen",
+        "reqlen",
         "resexit",
         "RHPORT",
         "semihosting",

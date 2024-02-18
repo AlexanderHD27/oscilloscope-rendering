@@ -10,7 +10,7 @@
 #include "dac.h"
 
 void usb_main_task() {
-    vTaskDelay(50);
+    vTaskDelay(10);
     tusb_init();
 
     while (true) {
@@ -18,6 +18,9 @@ void usb_main_task() {
         vTaskDelay(100);
     }
 }
+
+
+bool rx_ins_ready = true;
 
 void usb_rx_task() {
     vTaskDelay(100);
@@ -27,20 +30,26 @@ void usb_rx_task() {
     rx_buffer = dac_acquireInstructionBufferPointer();
     
     while (true) {
-        vTaskDelay(100);
+        vTaskDelay(10);
 
         bytes_available = tud_cdc_n_available(0);
         if (bytes_available) {
+            rx_ins_ready = false;
             gpio_put(25, 1);
+
+            // Read from USB, Submit Buffer, Acquire New One
             uint32_t count = tud_cdc_n_read(0, rx_buffer, 64);
             dac_submitInstructions(rx_buffer, count);
-            gpio_put(25, 0);
-        } else {
-            
-        }
+            rx_buffer = dac_acquireInstructionBufferPointer();
 
+            gpio_put(25, 0);
+            // Set Flag, for HID Interface, that Data can be written again!
+            rx_ins_ready = true;
+
+            // Send Report
+            tud_hid_report(0, &rx_ins_ready, 1);
+        }
     }
-    
 }
 
 void tud_mount_cb(void) {

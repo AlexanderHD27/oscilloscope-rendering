@@ -6,6 +6,7 @@
 
 extern tusb_desc_device_t const descriptorDeviceFullspeed;
 extern uint8_t const descriptorConfigurationFullspeed[];
+extern uint8_t const descriptorHIDReport[];
 
 extern char const* stringDescriptorArray [];
 extern char serialNumberBuffer[2 * PICO_UNIQUE_BOARD_ID_SIZE_BYTES + 1];
@@ -41,6 +42,7 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
     case PRODUCT_NAME:
     case CONFIG0_NAME:
     case INTERFACE0_NAME:
+    case INTERFACE1_NAME:
         string = stringDescriptorArray[index];
         charCount = MIN(strlen(string), 32);
 
@@ -77,4 +79,59 @@ uint8_t const * tud_descriptor_device_cb(void) {
 uint8_t const * tud_descriptor_configuration_cb(uint8_t index) {
   (void) index; // for multiple configurations
   return descriptorConfigurationFullspeed;
+}
+
+/**
+ * @brief Callback Invoked on USB GET HID REPORT DESCRIPTOR
+ * This is invoked by tinyusb. 
+ * 
+ * @param itf What interfaces? We only have one HID Interface -> ignored itf
+ * @return uint8_t const* Pointer to @ref descriptorHIDReport
+ */
+uint8_t const * tud_hid_descriptor_report_cb(uint8_t itf) {
+  (void) itf;
+  return descriptorHIDReport;
+}
+
+
+/**
+ * @brief Invoked when received GET_REPORT control request
+ * Invoked by tinyusb. Application must fill buffer report's content and return its length.
+ * 
+ * 
+ * @param itf 
+ * @param report_id 
+ * @param report_type 
+ * @param buffer 
+ * @param reqlen 
+ * @return uint16_t How many bytes were written into the buffer. Zero causes STALL Request to be sent to the Host
+ */
+uint16_t tud_hid_get_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t report_type, uint8_t* buffer, uint16_t reqlen) {
+    (void) itf;
+    (void) report_id;
+    (void) report_type;
+
+    extern bool rx_ins_ready;
+    
+    if(reqlen > 0)
+        buffer[0] = rx_ins_ready;
+    
+    return 1;
+}
+
+
+/**
+ * @brief Invoked when received SET_REPORT control request or received data on OUT endpoint ( Report ID = 0, Type = 0 )
+ * 
+ * @param itf
+ * @param report_id 
+ * @param report_type 
+ * @param buffer 
+ * @param bufsize 
+ */
+void tud_hid_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize) {
+    (void) itf;
+    (void) report_id;
+    (void) report_type;
+    // Just Do nothing with the set report
 }

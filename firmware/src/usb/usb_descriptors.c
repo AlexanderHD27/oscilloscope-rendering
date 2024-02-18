@@ -40,6 +40,14 @@ const tusb_desc_device_t descriptorDeviceFullspeed = {
 };
 
 // --------------------------------------------------------------------+
+// Descriptor HID Report
+// --------------------------------------------------------------------+
+
+uint8_t const descriptorHIDReport[] = {
+    TUD_HID_REPORT_DESC_GENERIC_INOUT(CFG_TUD_HID_EP_BUFSIZE)
+};
+
+// --------------------------------------------------------------------+
 // Config Descriptor
 // --------------------------------------------------------------------+
 
@@ -48,14 +56,18 @@ const tusb_desc_device_t descriptorDeviceFullspeed = {
 #define EP_NUM_CDC_CONFIG_OUT     0x02
 #define EP_NUM_CDC_CONFIG_IN      0x82
 
+#define EP_NUM_HID_INT_OUT     0x83
+#define EP_NUM_HID_INT_IN      0x03
+
 // Enumeration of the different USB Interfaces used by Config #1
 enum {
     ITF_NUM_CDC_0 = 0,
     ITF_NUM_CDC_0_DATA,
+    ITF_NUM_HID,
     ITF_NUM_TOTAL
 };
 
-#define  CONFIG_TOTAL_LEN  (TUD_CONFIG_DESC_LEN + TUD_CDC_DESC_LEN)
+#define  CONFIG_TOTAL_LEN  (TUD_CONFIG_DESC_LEN + TUD_CDC_DESC_LEN + TUD_HID_INOUT_DESC_LEN)
 
 /**
  * @brief Config #1 Descriptor for USB
@@ -63,7 +75,8 @@ enum {
  */
 uint8_t const descriptorConfigurationFullspeed[] = {
     TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL, CONFIG0_NAME, CONFIG_TOTAL_LEN, 0x00, 200),
-    TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_0, INTERFACE0_NAME, EP_NUM_CDC_CONFIG_NOTIF, 8, EP_NUM_CDC_CONFIG_OUT, EP_NUM_CDC_CONFIG_IN, CFG_TUD_CDC_RX_BUFSIZE)
+    TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_0, INTERFACE0_NAME, EP_NUM_CDC_CONFIG_NOTIF, 8, EP_NUM_CDC_CONFIG_OUT, EP_NUM_CDC_CONFIG_IN, CFG_TUD_CDC_RX_BUFSIZE),
+    TUD_HID_INOUT_DESCRIPTOR(ITF_NUM_HID, INTERFACE1_NAME, HID_ITF_PROTOCOL_NONE, sizeof(descriptorHIDReport), EP_NUM_HID_INT_OUT, EP_NUM_HID_INT_IN, CFG_TUD_HID_EP_BUFSIZE, 10)
 };
 
 
@@ -89,9 +102,6 @@ char const* stringDescriptorArray [] = {
     serialNumberBuffer,
     "Instruction Configuration",
     "Vector Data",
+    "Ready Interrupt"
 };
-
-
-
-
 
