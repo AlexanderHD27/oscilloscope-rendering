@@ -51,18 +51,24 @@ add_executable(main
     src/dac/interface.c
     src/dac/globals.c
     src/dac/processing.c
+
+    src/usb/common.c
+    src/usb/usb_descriptors.c
+    src/usb/callbacks.c
 )
 
 target_include_directories(main PUBLIC 
     include/
+    include/config/
+    ${FREERTOS_KERNEL_PATH}/include
+    ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include 
 )
+
+include(lib/pico-sdk/lib/tinyusb/hw/bsp/rp2040/family.cmake)
 
 # Add FreeRTOS
-include(freeRTOS.cmake)
-
-target_include_directories(FreeRTOS PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}
-)
+SET(FREERTOS_KERNEL_PATH ${CMAKE_CURRENT_LIST_DIR}/lib/FreeRTOS-Kernel)
+include(${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/library.cmake)
 
 # Adding PIO
 pico_generate_pio_header(main ${CMAKE_CURRENT_LIST_DIR}/src/dac/dac.pio)
@@ -71,10 +77,15 @@ pico_generate_pio_header(main ${CMAKE_CURRENT_LIST_DIR}/src/dac/dac.pio)
 target_link_libraries(main 
     pico_stdlib 
     pico_multicore
+    pico_unique_id 
     hardware_pio
     hardware_dma
     hardware_timer
-    FreeRTOS
+
+    FreeRTOS-Kernel-Heap4
+
+    tinyusb_device
+    tinyusb_board
 )
 
 # create map/bin/hex file etc.
@@ -82,6 +93,3 @@ pico_add_extra_outputs(main)
 
 # add url via pico_set_program_url
 example_auto_set_url(main)
-
-add_subdirectory(src/test/usb)
-add_subdirectory(src/test/freeRTOS)

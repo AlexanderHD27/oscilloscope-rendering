@@ -4,6 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/firmware/include/**",
+                "${workspaceFolder}/firmware/lib/pico-sdk/lib/tinyusb/src",
                 "${workspaceFolder}/firmware/lib/pico-sdk/lib/tinyusb/src"
             ],
             "defines": [],

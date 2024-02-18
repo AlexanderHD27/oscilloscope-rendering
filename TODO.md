@@ -6,21 +6,23 @@
 
 - [ ] FreeRTOS Architecture
   - [X] Fix Deadlock problem with queues
-  - [ ] Add Multicore Support
+  - [X] Add Multicore Support
   - [ ] Adding switch from Job-bases system to Raw Buffer
 
 - [ ] USB Interface
     - [ ] Raw Interface (sending raw buffers)
     - [X] Compressed Interfaces (Line, Points, Spline, Sin)
+    - [X] Sending Instrunctions from USB to the queue
 
-- [ ] DevOps
-    - [ ] Setup Jenkins
-    - [ ] Pipeline for Building Firmware
-    - [ ] Pipeline for Building and Deploing docs
+- [X] DevOps
+    - [X] Setup Jenkins
+    - [X] Pipeline for Building Firmware
+    - [X] Pipeline for Building and Deploing docs
 
 - [ ] Rendering 
     - [ ] 3D-Cube  
     - [ ] Terminal
     - [ ] Bad Apple?
+    - [ ] SVG Rendering
 
 
