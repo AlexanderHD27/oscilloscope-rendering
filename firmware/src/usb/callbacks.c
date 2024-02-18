@@ -10,14 +10,24 @@ extern uint8_t const descriptorConfigurationFullspeed[];
 extern char const* stringDescriptorArray [];
 extern char serialNumberBuffer[2 * PICO_UNIQUE_BOARD_ID_SIZE_BYTES + 1];
 
+/**
+ * @brief Static buffer used by @ref tud_descriptor_string_cb to responded with string
+ */
 static uint16_t descriptorStringBuffer[32];
 
-// Invoked when received GET STRING DESCRIPTOR request
-// Application return pointer to descriptor, whose contents must exist long enough for transfer to complete
+/**
+ * @brief Callback, invoked on USB GET STRING DESCRIPTOR request.
+ * This is invoked by tinyusb. Should return a pointer to a String descriptor (aka. char[]). The String 
+ * should no be longer then 32 chars
+ * 
+ * @param index What String form @ref stringDescriptorArray to return
+ * @param langid Language of the string (We No Speak Americano)
+ * @return uint16_t const* This should point to char array, the first 2 bytes should be the length of the array. See USB Spec
+ */
 uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
     
     uint8_t charCount = 0;
-    char * string;
+    const char * string;
 
     switch (index) {
     case LANG_ID:
@@ -47,16 +57,23 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
     return descriptorStringBuffer;
 }
 
-
-// Invoked when received GET DEVICE DESCRIPTOR
-// Application return pointer to descriptor
+/**
+ * @brief Callback, invoked on USB GET DEVICE DESCRIPTOR request.
+ * This is invoked by tinyusb. Should return a pointer to the @ref descriptorDeviceFullspeed
+ * 
+ * @return uint8_t const* Pointer to the configuration, in this case @ref descriptorDeviceFullspeed
+ */
 uint8_t const * tud_descriptor_device_cb(void) {
     return (uint8_t const *) &descriptorDeviceFullspeed;
 }
 
-// Invoked when received GET CONFIGURATION DESCRIPTOR
-// Application return pointer to descriptor
-// Descriptor contents must exist long enough for transfer to complete
+/**
+ * @brief Callback, invoked on USB GET CONFIGURATION DESCRIPTOR request
+ * This is invoked by tinyusb. 
+ * 
+ * @param index What Configuration should be returned: We only have on so, we ignore it
+ * @return uint8_t const* Pointer to the correct configuration Array. We only have one config, so always return @ref descriptorConfigurationFullspeed
+ */
 uint8_t const * tud_descriptor_configuration_cb(uint8_t index) {
   (void) index; // for multiple configurations
   return descriptorConfigurationFullspeed;

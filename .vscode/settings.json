@@ -42,6 +42,7 @@
         "srst",
         "struct",
         "targetname",
+        "tinyusb",
         "TPIU",
         "trst",
         "TUSB",

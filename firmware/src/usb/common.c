@@ -26,13 +26,13 @@ void usb_rx_task() {
         if ( tud_cdc_n_available(0)) {
             uint32_t count = tud_cdc_n_read(0, buf, sizeof(buf));
             gpio_put(25, 1);
+        } else {
+            gpio_put(25, 0);
         }
 
     }
     
 }
-
-// tiny USB Callback
 
 void tud_mount_cb(void) {
     
@@ -49,12 +49,3 @@ void tud_suspend_cb(bool remote_wakeup_en) {
 void tud_resume_cb(void) {
 
 }
-
-
-TU_ATTR_WEAK void tud_vendor_rx_cb(uint8_t itf) {
-    gpio_put(25, 1);
-};
-
-TU_ATTR_WEAK void tud_vendor_tx_cb(uint8_t itf, uint32_t sent_bytes) {
-
-};

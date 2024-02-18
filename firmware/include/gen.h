@@ -32,6 +32,10 @@ typedef uint16_t (* buffer_pointer_t)[];
  * This is not the actual size, but how many samples it holds per Channel.
  * This means the actual size is size * 2 * sizeof(uint16_t)
 */
+/**
+ * @var frameBuffer_t::size
+ * Pointer to the preallocated buffer of the size of @ref frameBuffer_t::size * 2 * sizeof(uint16_t)
+*/
 typedef struct {
     buffer_pointer_t buffer;
     size_t size;
@@ -70,6 +74,10 @@ enum InstructionChannelTarget {
  * @var instruction_t::id
  * What instruction to execute. The instruction ID is ORed with the @ref InstructionChannelTarget to select the correct channel to write to
 */
+/**
+ * @var instruction_t::param
+ * parameter list to the instruction. Note: Not all parameter are always used
+*/
 typedef struct  {
     enum InstructionID id;
     uint16_t length;
@@ -82,6 +90,10 @@ typedef struct  {
 /**
  * @var instructionBuffer_t::size
  * The actual size in bytes that are instruction (not the number of instructions)
+*/
+/**
+ * @var instructionBuffer_t::buffer
+ * The pointer to the actual preallocated-buffer
 */
 typedef struct {
     uint8_t * buffer;
