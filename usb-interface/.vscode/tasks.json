@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cargo",
+            "label": "cargo: test selected",
+            "command": "test",
+            "args": [ "finding_usb_device" ]
+        },
+        {
+            "type": "cargo",
+            "label": "cargo: run main",
+            "command": "run"
+        }
+
+    ]
+}

@@ -51,11 +51,17 @@ add_executable(main
     src/dac/interface.c
     src/dac/globals.c
     src/dac/processing.c
+
+    src/usb/common.c
+    src/usb/usb_descriptors.c
+    src/usb/callbacks.c
 )
 
 target_include_directories(main PUBLIC 
     include/
 )
+
+include(lib/pico-sdk/lib/tinyusb/hw/bsp/rp2040/family.cmake)
 
 # Add FreeRTOS
 include(freeRTOS.cmake)
@@ -75,6 +81,10 @@ target_link_libraries(main
     hardware_dma
     hardware_timer
     FreeRTOS
+
+    pico_unique_id 
+    tinyusb_device
+    tinyusb_board
 )
 
 # create map/bin/hex file etc.

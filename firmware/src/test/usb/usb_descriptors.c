@@ -43,7 +43,7 @@
 //--------------------------------------------------------------------+
 // Device Descriptors
 //--------------------------------------------------------------------+
-tusb_desc_device_t const desc_device =
+tusb_desc_device_t const descriptorDeviceFullspeed =
 {
     .bLength            = sizeof(tusb_desc_device_t),
     .bDescriptorType    = TUSB_DESC_DEVICE,
@@ -68,7 +68,7 @@ tusb_desc_device_t const desc_device =
 // Application return pointer to descriptor
 uint8_t const * tud_descriptor_device_cb(void)
 {
-  return (uint8_t const *) &desc_device;
+  return (uint8_t const *) &descriptorDeviceFullspeed;
 }
 
 //--------------------------------------------------------------------+
@@ -179,7 +179,7 @@ uint8_t const * tud_descriptor_configuration_cb(uint8_t index)
 //--------------------------------------------------------------------+
 
 // buffer to hold flash ID
-char serial[2 * PICO_UNIQUE_BOARD_ID_SIZE_BYTES + 1];
+char serialNumberBuffer[2 * PICO_UNIQUE_BOARD_ID_SIZE_BYTES + 1];
 
 // array of pointer to string descriptors
 char const* string_desc_arr [] =
@@ -187,7 +187,7 @@ char const* string_desc_arr [] =
   (const char[]) { 0x09, 0x04 }, // 0: is supported language is English (0x0409)
   "TinyUSB",                     // 1: Manufacturer
   "TinyUSB Device",              // 2: Product
-  serial,                        // 3: Serials, uses the flash ID
+  serialNumberBuffer,                        // 3: Serials, uses the flash ID
 };
 
 static uint16_t _desc_str[32];
@@ -209,7 +209,7 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid)
     // Note: the 0xEE index string is a Microsoft OS 1.0 Descriptors.
     // https://docs.microsoft.com/en-us/windows-hardware/drivers/usbcon/microsoft-defined-usb-descriptors
 
-    if (index == 3) pico_get_unique_board_id_string(serial, sizeof(serial));
+    if (index == 3) pico_get_unique_board_id_string(serialNumberBuffer, sizeof(serialNumberBuffer));
     
     if ( !(index < sizeof(string_desc_arr)/sizeof(string_desc_arr[0])) ) return NULL;
 

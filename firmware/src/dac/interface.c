@@ -17,10 +17,13 @@
 
 #include "dac.h"
 #include "gen.h"
+#include "usb.h"
 #include "includeGlobals.h"
 
 // from globals.c
 extern TaskHandle_t processingJobTask;
+extern TaskHandle_t usbMainTaskHandle;
+extern TaskHandle_t usbRXTaskHandle;
 
 void dac_submitInstructions(uint8_t * instructions_list, size_t instructions_list_size) {
     instructionBuffer_t instruction_buffer;
@@ -71,8 +74,10 @@ static void initFillQueuesTaskFunction(void * param) {
  * Internally used
  */
 static void initTasks() {
-    xTaskCreate(gen_processingTaskFunction, "Signal Process Task", 1024, NULL, 1, &processingJobTask);
-    xTaskCreate(initFillQueuesTaskFunction, "Init fill Queues", 64, NULL, 4, &initFillQueueTask);
+ //   xTaskCreate(gen_processingTaskFunction, "Signal Process Task", 1024, NULL, 1, &processingJobTask);
+ //   xTaskCreate(initFillQueuesTaskFunction, "Init fill Queues", 64, NULL, 4, &initFillQueueTask);
+    xTaskCreate(usb_main_task, "USB handler task", 1024, NULL, 3, &usbMainTaskHandle);
+    xTaskCreate(usb_rx_task, "USB rx task", 1024, NULL, 3, &usbRXTaskHandle);
 }
 
 void dac_init(PIO pio, uint sm, uint data_pin_start, uint control_pin_start) {

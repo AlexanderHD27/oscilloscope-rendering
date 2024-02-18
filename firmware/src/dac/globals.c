@@ -22,6 +22,8 @@ QueueHandle_t g_unusedFrameBufferQueue;
 QueueHandle_t g_frameBufferQueue;
 
 TaskHandle_t processingJobTask;
+TaskHandle_t usbMainTaskHandle;
+TaskHandle_t usbRXTaskHandle;
 
 uint16_t main_frame_buffers[GENERAL_QUEUE_SIZE][BUFFER_SIZE*2];
 uint8_t  main_instruction_buffer[GENERAL_QUEUE_SIZE][INSTRUCTION_BUF_SIZE];
