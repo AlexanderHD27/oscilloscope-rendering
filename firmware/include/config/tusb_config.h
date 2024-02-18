@@ -42,10 +42,11 @@
 #define CFG_TUD_MIDI              0
 #define CFG_TUD_VENDOR            0
 
-#define CFG_TUD_ENDPOINT0_SIZE     64
+// This must 64, because Fullspeed cannot handle more
+#define CFG_TUD_ENDPOINT0_SIZE   64
 
 // FIFO size of TX and RX
-#define CFG_TUD_CDC_RX_BUFSIZE   (TUD_OPT_HIGH_SPEED ? 512 : 64)
-#define CFG_TUD_CDC_TX_BUFSIZE   (TUD_OPT_HIGH_SPEED ? 512 : 64)
+#define CFG_TUD_CDC_RX_BUFSIZE   64
+#define CFG_TUD_CDC_TX_BUFSIZE   64
 
 #endif

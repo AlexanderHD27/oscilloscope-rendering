@@ -7,6 +7,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "dac.h"
+
 void usb_main_task() {
     vTaskDelay(50);
     tusb_init();
@@ -19,15 +21,22 @@ void usb_main_task() {
 
 void usb_rx_task() {
     vTaskDelay(100);
+
+    uint32_t bytes_available;
+    static uint8_t * rx_buffer = NULL; 
+    rx_buffer = dac_acquireInstructionBufferPointer();
+    
     while (true) {
         vTaskDelay(100);
-        uint8_t buf[64];
 
-        if ( tud_cdc_n_available(0)) {
-            uint32_t count = tud_cdc_n_read(0, buf, sizeof(buf));
+        bytes_available = tud_cdc_n_available(0);
+        if (bytes_available) {
             gpio_put(25, 1);
-        } else {
+            uint32_t count = tud_cdc_n_read(0, rx_buffer, 64);
+            dac_submitInstructions(rx_buffer, count);
             gpio_put(25, 0);
+        } else {
+            
         }
 
     }
