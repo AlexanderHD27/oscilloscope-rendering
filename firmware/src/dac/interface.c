@@ -52,6 +52,7 @@ TaskHandle_t initFillQueueTask;
  * @param param Not used, can be ignored
  */
 static void initFillQueuesTaskFunction(void * param) {
+    vTaskDelay(500);
     for(int i=0; i<GENERAL_QUEUE_SIZE; i++) {
         frameBuffer_t newFrameBuffer;
         newFrameBuffer.size = BUFFER_SIZE;
@@ -74,10 +75,15 @@ static void initFillQueuesTaskFunction(void * param) {
  * Internally used
  */
 static void initTasks() {
- //   xTaskCreate(gen_processingTaskFunction, "Signal Process Task", 1024, NULL, 1, &processingJobTask);
- //   xTaskCreate(initFillQueuesTaskFunction, "Init fill Queues", 64, NULL, 4, &initFillQueueTask);
+    xTaskCreate(gen_processingTaskFunction, "Signal Process Task", 1024, NULL, 1, &processingJobTask);
+    xTaskCreate(initFillQueuesTaskFunction, "Init fill Queues", 64, NULL, 4, &initFillQueueTask);
+    vTaskCoreAffinitySet(processingJobTask, (1 << 1));
+    vTaskCoreAffinitySet(initFillQueueTask, (1 << 1));
+
     xTaskCreate(usb_main_task, "USB handler task", 1024, NULL, 3, &usbMainTaskHandle);
     xTaskCreate(usb_rx_task, "USB rx task", 1024, NULL, 3, &usbRXTaskHandle);
+    vTaskCoreAffinitySet(usbMainTaskHandle, (1 << 0));
+    vTaskCoreAffinitySet(usbRXTaskHandle, (1 << 0));
 }
 
 void dac_init(PIO pio, uint sm, uint data_pin_start, uint control_pin_start) {

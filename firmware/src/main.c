@@ -68,7 +68,10 @@ int main() {
     // Create Test Task for providing a constant stream of instruction
     TaskHandle_t provideJobTaskHandle;
     xTaskCreate(provideJobTask, "[Test] Create Jobs", 128, NULL, 1, &provideJobTaskHandle);
+    vTaskCoreAffinitySet(provideJobTaskHandle, (1 << 0));
 
     // Start FreeRTOS Scheduler
     vTaskStartScheduler();
+
+    while(1){};
 }

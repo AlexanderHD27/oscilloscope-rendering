@@ -9,7 +9,7 @@
             "cwd": "${workspaceRoot}/firmware",
             "executable": "${command:cmake.launchTargetPath}",
             "request": "launch",
-            "preLaunchTask": "Pico: flash freeRTOS_test",
+            "preLaunchTask": "Pico: flash main",
             "type": "cortex-debug",
             "servertype": "external",
             "gdbPath" : "gdb-multiarch",

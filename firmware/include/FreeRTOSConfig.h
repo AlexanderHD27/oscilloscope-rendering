@@ -8,7 +8,7 @@
 #define configCPU_CLOCK_HZ                      133000000
 #define configSYSTICK_CLOCK_HZ                  1000000  
 #define configTICK_RATE_HZ                      1000      
-#define configMAX_PRIORITIES                    4
+#define configMAX_PRIORITIES                    5
 #define configMINIMAL_STACK_SIZE                256     
 #define configMAX_TASK_NAME_LEN                 16
 #define configUSE_16_BIT_TICKS                  0
@@ -61,8 +61,9 @@
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY    [dependent on processor and application]
 #define configMAX_API_CALL_INTERRUPT_PRIORITY   [dependent on processor and application]
 
+#include <assert.h>
 /* Define to trap errors during development. */
-//#define configASSERT( ( x ) ) assert()
+#define configASSERT(x)                         assert(x)
 
 /* FreeRTOS MPU specific definitions. */
 #define configINCLUDE_APPLICATION_DEFINED_PRIVILEGED_FUNCTIONS 0
@@ -85,7 +86,7 @@
 #define INCLUDE_xTaskGetIdleTaskHandle          0
 #define INCLUDE_eTaskGetState                   0
 #define INCLUDE_xEventGroupSetBitFromISR        1
-#define INCLUDE_xTimerPendFunctionCall          0
+#define INCLUDE_xTimerPendFunctionCall          1
 #define INCLUDE_xTaskAbortDelay                 0
 #define INCLUDE_xTaskGetHandle                  0
 #define INCLUDE_xTaskResumeFromISR              1
@@ -94,6 +95,11 @@
 #define xPortPendSVHandler isr_pendsv
 #define xPortSysTickHandler isr_systick
 
+#define configNUMBER_OF_CORES                   2
+#define configTICK_CORE                         0
+#define configRUN_MULTIPLE_PRIORITY             1
+#define configUSE_CORE_AFFINITY                 1
+#define configUSE_PASSIVE_IDLE_HOOK             0
 
 /* A header file that defines trace macro can be included here. */
 
