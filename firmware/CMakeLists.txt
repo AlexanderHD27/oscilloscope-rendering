@@ -59,6 +59,7 @@ add_executable(main
 
 target_include_directories(main PUBLIC 
     include/
+    include/config/
     ${FREERTOS_KERNEL_PATH}/include
     ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include 
 )
