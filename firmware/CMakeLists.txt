@@ -51,10 +51,6 @@ add_executable(main
     src/dac/interface.c
     src/dac/globals.c
     src/dac/processing.c
-
-    src/usb/common.c
-    src/usb/usb_descriptors.c
-    src/usb/callbacks.c
 )
 
 target_include_directories(main PUBLIC 
@@ -63,8 +59,6 @@ target_include_directories(main PUBLIC
     ${FREERTOS_KERNEL_PATH}/include
     ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include 
 )
-
-include(lib/pico-sdk/lib/tinyusb/hw/bsp/rp2040/family.cmake)
 
 # Add FreeRTOS
 SET(FREERTOS_KERNEL_PATH ${CMAKE_CURRENT_LIST_DIR}/lib/FreeRTOS-Kernel)
@@ -83,9 +77,6 @@ target_link_libraries(main
     hardware_timer
 
     FreeRTOS-Kernel-Heap4
-
-    tinyusb_device
-    tinyusb_board
 )
 
 # create map/bin/hex file etc.

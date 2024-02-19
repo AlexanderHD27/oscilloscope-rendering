@@ -34,22 +34,6 @@
 #define PIN_LED_GREEN 17
 #define PIN_LED_YELLOW 16
 
-uint32_t counter = 0;
-
-void provideJobTask(void * param) {
-    while (true) {
-        uint8_t * _insBuf = dac_acquireInstructionBufferPointer();
-        uint8_t * insBuf = _insBuf;
-        insBuf += gen_addInstructionSine(insBuf, X, BUFFER_SIZE/2, 0x00a0, 0xff60, (uint16_t)(BUFFER_SIZE/2/3), BUFFER_SIZE/2/4);
-        insBuf += gen_addInstructionSine(insBuf, Y, BUFFER_SIZE/2, 0x00a0, 0xff60, (uint16_t)(BUFFER_SIZE/2/2), 0x0000);
-        insBuf += gen_addInstructionConst(insBuf, X, BUFFER_SIZE/2, 0x7fff - 0xffff*(0.5*cosf( PI*((float)(counter*3)/(BUFFER_SIZE/2-1)))) );
-        insBuf += gen_addInstructionConst(insBuf, Y, BUFFER_SIZE/2, 0x7fff - 0xffff*(0.5*sinf( PI*((float)(counter*2)/(BUFFER_SIZE/2-1)))) );
-counter = (counter + 0x1f) % BUFFER_SIZE;
-        dac_submitInstructions(_insBuf, insBuf - _insBuf);
-    }
-}
-
-
 int main() {
 
     // Init Debug LEDs
@@ -65,11 +49,7 @@ int main() {
     // Init DAC
     dac_init(pio, sm, PIN_DATA_START, PIN_CTRL_START);
 
-    // Create Test Task for providing a constant stream of instruction
-    //TaskHandle_t provideJobTaskHandle;
-    //xTaskCreate(provideJobTask, "[Test] Create Jobs", 128, NULL, 1, &provideJobTaskHandle);
-    //vTaskCoreAffinitySet(provideJobTaskHandle, (1 << 0));
-
+    
     // Start FreeRTOS Scheduler
     vTaskStartScheduler();
 

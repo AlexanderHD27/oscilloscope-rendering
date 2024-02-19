@@ -17,7 +17,6 @@
 
 #include "dac.h"
 #include "gen.h"
-#include "usb.h"
 #include "includeGlobals.h"
 
 // from globals.c
@@ -80,8 +79,7 @@ static void initTasks() {
     vTaskCoreAffinitySet(processingJobTask, (1 << 1));
     vTaskCoreAffinitySet(initFillQueueTask, (1 << 1));
 
-    xTaskCreate(usb_main_task, "USB handler task", 1024, NULL, 3, &usbMainTaskHandle);
-    xTaskCreate(usb_rx_task, "USB rx task", 1024, NULL, 3, &usbRXTaskHandle);
+
     vTaskCoreAffinitySet(usbMainTaskHandle, (1 << 0));
     vTaskCoreAffinitySet(usbRXTaskHandle, (1 << 0));
 }
