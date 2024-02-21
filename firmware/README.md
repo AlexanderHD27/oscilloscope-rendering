@@ -1,5 +1,8 @@
 Firmware for the RPi Pico for Oscilloscope Renderer
 
+
+[Github](https://github.com/AlexanderHD27/oscilloscope-drawing)
+
 ## Downloads
 [main.elf](https://www.mintcalc.com/projects/osci-rendering/bin/main.elf)
 
