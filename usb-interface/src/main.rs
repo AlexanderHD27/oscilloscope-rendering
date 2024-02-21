@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{thread::sleep, time::{Duration, Instant}};
 
 use libusb::{Context, Device, DeviceHandle};
 
@@ -35,17 +35,22 @@ fn main() {
     let mut usb_interface: usb::USBVectorInterface = usb::USBVectorInterface::new(dev_handle);
     let timeout = Duration::new(1, 0);
 
+    let total_start: Instant = Instant::now();
     for i in 0..0xff {
-        println!("{}", i);
-
+        let start: Instant = Instant::now();
         let mut ins = gen::InstructionBuilder::new();
         ins.add_const(gen::CHANNEL::Y, gen::SAMPLE_SIZE/2, (0xff - i) << 8);
         ins.add_const(gen::CHANNEL::X, gen::SAMPLE_SIZE/2, i << 8);
         ins.add_sin(gen::CHANNEL::Y, gen::SAMPLE_SIZE/2, 0x0000, 0x7fff, gen::SAMPLE_SIZE/2, 0x0400);
         ins.add_sin(gen::CHANNEL::X, gen::SAMPLE_SIZE/2, 0x0000, 0x7fff, gen::SAMPLE_SIZE/2, 0x0400);                    
         
-        usb_interface.submit_instruction(ins, timeout); 
+        usb_interface.submit_instruction(ins, timeout);
+        sleep(Duration::from_millis(1));
+        
+        println!("{} {}ms", i, start.elapsed().as_millis());
     }
+    let duration = total_start.elapsed();
+    println!("Timer per sample: {}", duration.as_millis()/256);
 
     usb_interface.flush(timeout);
     println!("Done");

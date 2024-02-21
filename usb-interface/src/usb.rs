@@ -50,7 +50,7 @@ impl<'a> USBVectorInterface<'a> {
         
         let mut int_buf: [u8; 8] = [0; 8];
         self.dev_handle.write_bulk(0x02, &mut ins.finish(), timeout). unwrap();
-        self.dev_handle.read_interrupt(0x83, &mut int_buf, timeout).unwrap();
+        //self.dev_handle.read_interrupt(0x83, &mut int_buf, timeout).unwrap();
     }
 
     pub fn flush(&mut self, timeout: Duration) {

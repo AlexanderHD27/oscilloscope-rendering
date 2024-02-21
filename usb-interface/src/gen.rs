@@ -41,7 +41,7 @@ pub const INS_LENGTH_SINE:      usize = 11;
 
 
 pub const MAX_INSTRUCTION_LIST_SIZE: usize = 128;
-pub const SAMPLE_SIZE: u16 = 0x2000;
+pub const SAMPLE_SIZE: u16 = 0x800;
 
 pub struct InstructionBuilder {
     buffer: [u8; MAX_INSTRUCTION_LIST_SIZE],

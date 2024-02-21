@@ -18,7 +18,7 @@
  * The Larger the frame buffer, the longer a frame is -> more memory is used
  * Warning: @ref BUFFER_SIZE * ( @ref GENERAL_QUEUE_SIZE + 2) * sizeof(uint16_t) bytes of memory must be available. The RP2040 has 260 KB of SRAM (Instruction memory is separate)
  */
-#define BUFFER_SIZE 0x2000
+#define BUFFER_SIZE 0x800
 
 /**
  * @brief Number of Buffers in circulation + Queue Sizes
