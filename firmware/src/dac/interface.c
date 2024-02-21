@@ -15,14 +15,13 @@
 #include "FreeRTOSConfig.h"
 #include "queue.h"
 
+#include <stdio.h>
+
 #include "dac.h"
 #include "gen.h"
+#include "usb.h"
 #include "includeGlobals.h"
 
-// from globals.c
-extern TaskHandle_t processingJobTask;
-extern TaskHandle_t usbMainTaskHandle;
-extern TaskHandle_t usbRXTaskHandle;
 
 void dac_submitInstructions(uint8_t * instructions_list, size_t instructions_list_size) {
     instructionBuffer_t instruction_buffer;
@@ -69,19 +68,26 @@ static void initFillQueuesTaskFunction(void * param) {
     vTaskDelete(NULL);    
 }
 
+// Global Task Handles
+extern TaskHandle_t processingJobTask;
+extern TaskHandle_t usbMainTaskHandle;
+extern TaskHandle_t usbSetupTaskHandle;
+
 /**
  * @brief Inits and start all relevant task
  * Internally used
  */
 static void initTasks() {
     xTaskCreate(gen_processingTaskFunction, "Signal Process Task", 1024, NULL, 1, &processingJobTask);
-    xTaskCreate(initFillQueuesTaskFunction, "Init fill Queues", 64, NULL, 4, &initFillQueueTask);
     vTaskCoreAffinitySet(processingJobTask, (1 << 1));
+    
+    xTaskCreate(initFillQueuesTaskFunction, "Init fill Queues", 64, NULL, 4, &initFillQueueTask);
     vTaskCoreAffinitySet(initFillQueueTask, (1 << 1));
 
+    xTaskCreate(usb_initTaskFunction, "USB Init", 128, NULL, 4, &usbSetupTaskHandle);
+    vTaskCoreAffinitySet(usbSetupTaskHandle, (1 << 0));
 
-    vTaskCoreAffinitySet(usbMainTaskHandle, (1 << 0));
-    vTaskCoreAffinitySet(usbRXTaskHandle, (1 << 0));
+    printf("[SYS] Created Startup Task \n");
 }
 
 void dac_init(PIO pio, uint sm, uint data_pin_start, uint control_pin_start) {

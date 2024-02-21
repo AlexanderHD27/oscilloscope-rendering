@@ -143,6 +143,21 @@
             "isBackground": true
         },
         {
+            "type": "shell",
+            "label": "Pico: launch serial monitor",
+            "command": [
+                "scripts/launch_serial_monitor.sh",
+            ],
+            "args": [
+                "/dev/ttyACM0"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}/firmware"
+            },
+            "isBackground": true
+        },
+
+        {
             "type": "cmake",
             "label": "CMake: Clean",
             "command": "clean"

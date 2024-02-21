@@ -9,7 +9,6 @@
  * 
  */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -17,8 +16,12 @@
 #include "FreeRTOSConfig.h"
 #include "task.h"
 
+
+#include "pico/stdlib.h"
 #include "hardware/pio.h"
 #include "dac.h"
+
+#include <stdio.h>
 
 #define PIN_DATA_START 2
 #define PIN_CTRL_START 10
@@ -35,6 +38,8 @@
 #define PIN_LED_YELLOW 16
 
 int main() {
+    stdio_uart_init();
+    printf("\n\n======== Reset ========\n");
 
     // Init Debug LEDs
     const uint32_t gpioOutMask = (1 << PIN_LED) | (1 << PIN_LED_GREEN) | (1 << PIN_LED_YELLOW);
@@ -49,8 +54,8 @@ int main() {
     // Init DAC
     dac_init(pio, sm, PIN_DATA_START, PIN_CTRL_START);
 
-    
     // Start FreeRTOS Scheduler
+    printf("[SYS] Run Schedular\n");
     vTaskStartScheduler();
 
     while(1){};

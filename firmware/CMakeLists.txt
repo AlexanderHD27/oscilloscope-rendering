@@ -51,10 +51,15 @@ add_executable(main
     src/dac/interface.c
     src/dac/globals.c
     src/dac/processing.c
+
+    src/usb/lowlevel.c
+    src/usb/handlers.c
+    src/usb/def_descriptor.c
 )
 
 target_include_directories(main PUBLIC 
     include/
+    include/usb
     include/config/
     ${FREERTOS_KERNEL_PATH}/include
     ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/include 
@@ -78,6 +83,10 @@ target_link_libraries(main
 
     FreeRTOS-Kernel-Heap4
 )
+
+pico_enable_stdio_uart(main 1)
+
+add_compile_options(-Wsizeof-pointer-memaccess)
 
 # create map/bin/hex file etc.
 pico_add_extra_outputs(main)
