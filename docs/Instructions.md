@@ -28,3 +28,8 @@ buffer[offset + 1] = (value & 0x00ff) >> 8;
 | `0x05` | SINE      | lowValue, highValue, period, phase       |
 
 (CUBIC and QUADRATIC refer to [Bézier Curves](https://en.wikipedia.org/wiki/B%C3%A9zier_curve), see [desmos](https://www.desmos.com/calculator/q5xuopyfo6))
+
+### USB - Protocol
+Instructions are transmitted in buffers, every buffer contains the same amount of bytes (INSTRUCTION_BUFFER_SIZE)
+The instruction buffers are transmitted in a cluster where INSTRUCTION_CLUSTER_SIZE are grouped into a cluster
+

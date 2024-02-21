@@ -33,9 +33,17 @@
  * @brief Size of each Instruction Buffer
  * 
  * One instruction contains at least 3 bytes up 11 bytes.
- * Warning: @ref INSTRUCTION_BUF_SIZE * @ref GENERAL_QUEUE_SIZE + 2* sizeof(uint8_t) bytes of memory must be available
+ * Warning: @ref INSTRUCTION_CLUSTER_SIZE * @ref INSTRUCTION_BUF_SIZE * @ref GENERAL_QUEUE_SIZE + 2* sizeof(uint8_t) bytes of memory must be available
+ * 
+ * This should be a multiple of 64, because this is the USB-FullSpeed chunksize
  */
 #define INSTRUCTION_BUF_SIZE 128
+
+/**
+ * @brief How many Instruction Buffers are grouped into one chunk
+ * This is mainly for reducing usb traffic
+ */
+#define INSTRUCTION_CLUSTER_SIZE 8
 
 /**
  * @brief How many FreeRTOS-Ticks a recv should take befor restarting
@@ -44,7 +52,8 @@
 
 /**
  * @brief Base Frequency of the PIO Cores in kHz
- * can be from 2 kHz to 133 MHz 
+ * can be from 2 kHz to 133 MHz. In total you need 20 cycles per same.
+ * This means PIO_FREQ_KHZ*1000 / 20 yields sample rate
  */
 #define PIO_FREQ_KHZ 10000
 

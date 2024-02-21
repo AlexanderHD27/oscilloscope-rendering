@@ -16,8 +16,8 @@ void usb_main_task() {
     tusb_init();
 
     uint32_t bytes_available;
-    static uint8_t * rx_buffer = NULL; 
-    rx_buffer = dac_acquireInstructionBufferPointer();
+    instructionBufferClusters_t insBuffer = dac_acquireInstructionBuffer();
+    uint i = 0;
     
     while (true) {
         tud_task();
@@ -29,20 +29,25 @@ void usb_main_task() {
             rx_ins_ready = false;
             gpio_put(25, 1);
 
-            // Read from USB, Submit Buffer, Acquire New One
-            uint32_t count = tud_cdc_n_read(0, rx_buffer, 64);
-            //dac_submitInstructions(rx_buffer, count);
-            //rx_buffer = dac_acquireInstructionBufferPointer();
+            // Read from USB into buffer/cluster
+            insBuffer.size[i] = tud_cdc_n_read(0, (insBuffer.buffer + i*INSTRUCTION_BUF_SIZE), 64);
+            tud_hid_report(0, &rx_ins_ready, 1);
+            printf("[USB] RX Cluster %d (%d)\n", i, insBuffer.size[i]);
+
+            i++;
+            if(i >= INSTRUCTION_CLUSTER_SIZE) {
+                // if Cluster is full, we:  Submit Buffer, Acquire New One
+                i = 0;
+                dac_submitInstructions(insBuffer);
+                insBuffer = dac_acquireInstructionBuffer();
+                printf("Submit buffer!\n");
+                vTaskDelay(10);
+            }
 
             gpio_put(25, 0);
             // Set Flag, for HID Interface, that Data can be written again!
             rx_ins_ready = true;
-
-            // Send Report
-            //tud_hid_report(0, &rx_ins_ready, 1);
         }
-
-        //vTaskDelay(1);
     }
 }
 

@@ -1,3 +1,5 @@
+#include "dacConfig.h"
+
 /**
  * @file gen.h
  * @author AlexanderHD27
@@ -88,17 +90,17 @@ typedef struct  {
  * @brief hold size and buffer pointer of a instruction buffer
  */
 /**
- * @var instructionBuffer_t::size
+ * @var instructionBufferClusters_t::size
  * The actual size in bytes that are instruction (not the number of instructions)
 */
 /**
- * @var instructionBuffer_t::buffer
+ * @var instructionBufferClusters_t::buffer
  * The pointer to the actual preallocated-buffer
 */
 typedef struct {
     uint8_t * buffer;
-    size_t size;
-} instructionBuffer_t;
+    size_t * size;
+} instructionBufferClusters_t;
 
 #include "dac.h"
 
@@ -108,10 +110,11 @@ typedef struct {
  * @brief Process a instruction list by parsing and executing every instruction
  * This is called by the @ref gen_processingTaskFunction
  * 
+ * @param cluster_num Selects the cluster from the instruction buffer, that should be processed
  * @param instructions Holds size and pointer to the instruction to process
  * @param targetFrameBuffer Target FrameBuffer that is filled with resulting signal. The Buffer is not overwrite, so hold data may remain in it 
  */
-void gen_processInstruction(instructionBuffer_t instructions, frameBuffer_t targetFrameBuffer);
+void gen_processInstruction(instructionBufferClusters_t instructions, uint cluster_num, frameBuffer_t target_frame_buffer);
 
 /**
  * @brief Executes a single already parsed instruction and writes the result to the buffer

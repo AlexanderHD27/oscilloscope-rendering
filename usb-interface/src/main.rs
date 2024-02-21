@@ -36,23 +36,24 @@ fn main() {
     let timeout = Duration::new(1, 0);
 
     let total_start: Instant = Instant::now();
-    for i in 0..0xff {
-        let start: Instant = Instant::now();
-        let mut ins = gen::InstructionBuilder::new();
-        ins.add_const(gen::CHANNEL::Y, gen::SAMPLE_SIZE/2, (0xff - i) << 8);
-        ins.add_const(gen::CHANNEL::X, gen::SAMPLE_SIZE/2, i << 8);
-        ins.add_sin(gen::CHANNEL::Y, gen::SAMPLE_SIZE/2, 0x0000, 0x7fff, gen::SAMPLE_SIZE/2, 0x0400);
-        ins.add_sin(gen::CHANNEL::X, gen::SAMPLE_SIZE/2, 0x0000, 0x7fff, gen::SAMPLE_SIZE/2, 0x0400);                    
-        
-        usb_interface.submit_instruction(ins, timeout);
-        sleep(Duration::from_millis(1));
-        
-        println!("{} {}ms", i, start.elapsed().as_millis());
-    }
+    //loop {   
+        for i in 0..0xfff {
+            let start: Instant = Instant::now();
+            let mut ins = gen::InstructionBuilder::new();
+            ins.add_sin(gen::CHANNEL::Y, gen::SAMPLE_SIZE, 0x0000, 0x7fff, gen::SAMPLE_SIZE/2, i << 4);
+            ins.add_sin(gen::CHANNEL::X, gen::SAMPLE_SIZE, 0x0000, 0x7fff, gen::SAMPLE_SIZE/2, 0x0400);                    
+            
+            usb_interface.submit_instruction(ins, timeout);
+            sleep(Duration::from_millis(1));
+            
+            println!("{} {}ms", i, start.elapsed().as_millis());
+        }
+    //    break;
+    //}
     let duration = total_start.elapsed();
-    println!("Timer per sample: {}", duration.as_millis()/256);
+    println!("Timer per sample: {}", duration.as_millis()/0xfff);
 
-    usb_interface.flush(timeout);
+    //usb_interface.flush(timeout);
     println!("Done");
 
 }

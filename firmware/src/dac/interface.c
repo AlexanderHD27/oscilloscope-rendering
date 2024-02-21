@@ -24,19 +24,15 @@
 extern TaskHandle_t processingJobTask;
 extern TaskHandle_t usbMainTaskHandle;
 
-void dac_submitInstructions(uint8_t * instructions_list, size_t instructions_list_size) {
-    instructionBuffer_t instruction_buffer;
-    instruction_buffer.buffer = instructions_list;
-    instruction_buffer.size = instructions_list_size;
-    
+void dac_submitInstructions(instructionBufferClusters_t instruction_buffer) {    
     while(!xQueueSend(g_instructionBufferQueue, &instruction_buffer, DEFAULT_QUEUE_WAIT_DURATION));
 };
 
 
-uint8_t * dac_acquireInstructionBufferPointer() {
-    instructionBuffer_t instruction_buffer;
+instructionBufferClusters_t dac_acquireInstructionBuffer() {
+    instructionBufferClusters_t instruction_buffer;
     while(!xQueueReceive(g_unusedInstructionBufferQueue, &instruction_buffer, DEFAULT_QUEUE_WAIT_DURATION));
-    return instruction_buffer.buffer;
+    return instruction_buffer;
 };
 
 /**
@@ -60,9 +56,14 @@ static void initFillQueuesTaskFunction(void * param) {
     }
 
     for(int i=0; i<GENERAL_QUEUE_SIZE-2; i++) {
-        instructionBuffer_t new_instruction_buffer;
-        new_instruction_buffer.size = 0;
-        new_instruction_buffer.buffer = (uint8_t *)(&main_instruction_buffer[i]);
+        instructionBufferClusters_t new_instruction_buffer;
+
+        for(int j=0; j<INSTRUCTION_CLUSTER_SIZE; j++)
+            main_instruction_sizes[i][j] = 0;
+
+        new_instruction_buffer.size = (size_t *)(&main_instruction_sizes[i][0]);
+        new_instruction_buffer.buffer = (uint8_t *)(&main_instruction_buffer[i][0][0]);
+
         while(!xQueueSend(g_unusedInstructionBufferQueue, &new_instruction_buffer, DEFAULT_QUEUE_WAIT_DURATION));
     }
 
@@ -84,8 +85,8 @@ static void initTasks() {
 }
 
 void dac_init(PIO pio, uint sm, uint data_pin_start, uint control_pin_start) {
-    g_unusedInstructionBufferQueue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(instructionBuffer_t));
-    g_instructionBufferQueue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(instructionBuffer_t));
+    g_unusedInstructionBufferQueue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(instructionBufferClusters_t));
+    g_instructionBufferQueue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(instructionBufferClusters_t));
     g_unusedFrameBufferQueue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(frameBuffer_t));
     g_frameBufferQueue = xQueueCreate(GENERAL_QUEUE_SIZE, sizeof(frameBuffer_t));
 

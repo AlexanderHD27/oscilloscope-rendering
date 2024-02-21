@@ -94,19 +94,19 @@ void gen_processingTaskFunction(void * param);
 
 /**
  * Submits a new instruction list to the dac. This function should be use by the IO interface (e.g. USB) to submit an instruction list
- * @param instructions_list pointer to the instruction array. Should be pointer acquired from @ref get_instruction_buf
- * @param instructions_list_size size of the instruction list (how many bytes are used for instruction, not size of the instruction_list -> instruction_list_size < sizeof(instruction_list))
+ * @param instruction_buffer @ref instructionBufferClusters_t struct that should contain pointers to the instruction array and its length. 
+ * Should be pointer acquired from @ref dac_acquireInstructionBuffer
 */
-void dac_submitInstructions(uint8_t * instructions_list, size_t instructions_list_size);
+void dac_submitInstructions(instructionBufferClusters_t instruction_buffer);
 
 /**
  * @brief acquires a buffer for instructions to be written to
  * 
  * After running this, the buffer should be returned via @ref dac_submitInstructions
  * 
- * @return pointer to the uint8_t buffer that should be fill with instructions. The size of the instruction list terminated by @ref INSTRUCTION_BUF_SIZE in bytes 
+ * @return @ref instructionBufferClusters_t, that contain pointers to the uint8_t buffer and length array that should be fill with instructions. The size of the instruction list terminated by @ref INSTRUCTION_BUF_SIZE in bytes 
 */
-uint8_t * dac_acquireInstructionBufferPointer();
+instructionBufferClusters_t dac_acquireInstructionBuffer();
 
 #endif
 

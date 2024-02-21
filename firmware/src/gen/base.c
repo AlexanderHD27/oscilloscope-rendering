@@ -24,7 +24,7 @@ enum PARSER_STATE {
     READ_PARAM_LOW,
 };
 
-void gen_processInstruction(instructionBuffer_t instructions, frameBuffer_t target_frame_buffer) {
+void gen_processInstruction(instructionBufferClusters_t instructions, uint cluster_num, frameBuffer_t target_frame_buffer) {
     enum PARSER_STATE parse_state = READ_ID;
     uint param_count = 0;
     uint param_index = 0;
@@ -36,9 +36,12 @@ void gen_processInstruction(instructionBuffer_t instructions, frameBuffer_t targ
     size_t buffer_offset_x = 0;
     size_t buffer_offset_y = 0;
 
+    size_t size = instructions.size[cluster_num];
+    uint8_t * buffer = instructions.buffer + INSTRUCTION_BUF_SIZE * cluster_num;
+
     // This implements a state machine for parsing the instruction list
-    for(int i=0; i<instructions.size; i++) { 
-        current_byte = instructions.buffer[i];
+    for(int i=0; i<size; i++) { 
+        current_byte = buffer[i];
 
         switch (parse_state) {
         // Reading Instruction ID 

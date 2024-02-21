@@ -25,4 +25,5 @@ TaskHandle_t processingJobTask;
 TaskHandle_t usbMainTaskHandle;
 
 uint16_t main_frame_buffers[GENERAL_QUEUE_SIZE][BUFFER_SIZE*2];
-uint8_t  main_instruction_buffer[GENERAL_QUEUE_SIZE][INSTRUCTION_BUF_SIZE];
+uint8_t  main_instruction_buffer[GENERAL_QUEUE_SIZE][INSTRUCTION_CLUSTER_SIZE][INSTRUCTION_BUF_SIZE];
+size_t  main_instruction_sizes[GENERAL_QUEUE_SIZE][INSTRUCTION_CLUSTER_SIZE];
