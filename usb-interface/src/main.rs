@@ -1,9 +1,11 @@
-use std::{thread::sleep, time::{Duration, Instant}};
+use std::{f32::consts::PI, thread::sleep, time::{Duration, Instant}};
 
 use libusb::{Context, Device, DeviceHandle};
 
-mod usb;
 mod gen;
+mod usb;
+
+const BUFFER_SIZE: usize = 0x1000;
 
 fn main() {
     let mut context = libusb::Context::new().unwrap();
@@ -31,29 +33,24 @@ fn main() {
     
     dev_handle.claim_interface(usb::DATA_INTERFACE).unwrap();
     dev_handle.claim_interface(usb::INT_INTERFACE).unwrap();
+
+    let mut buf: [u8; BUFFER_SIZE*2*2] = [0; BUFFER_SIZE*2*2];
+    let timeout = Duration::from_millis(1000);
+
+    for i in 0..BUFFER_SIZE {
+        let x: f32 = (i as f32)/(BUFFER_SIZE as f32);
+        //let y = (((f32::sin(x*PI*2.0))*0.5 + 0.5) * (0xffff as f32)) as u16;
+        let y = (x*(0xffff as f32)) as u16;
+
+        buf[i*4 + 0] = ((y >> 8) & 0xff) as u8;
+        buf[i*4 + 1] = ((y >> 0) & 0xff) as u8;
+        buf[i*4 + 2] = ((y >> 8) & 0xff) as u8;
+        buf[i*4 + 3] = ((y >> 0) & 0xff) as u8;
+    }
     
-    let mut usb_interface: usb::USBVectorInterface = usb::USBVectorInterface::new(dev_handle);
-    let timeout = Duration::new(1, 0);
-
-    let total_start: Instant = Instant::now();
-    //loop {   
-        for i in 0..0xfff {
-            let start: Instant = Instant::now();
-            let mut ins = gen::InstructionBuilder::new();
-            ins.add_sin(gen::CHANNEL::Y, gen::SAMPLE_SIZE, 0x0000, 0x7fff, gen::SAMPLE_SIZE/2, i << 4);
-            ins.add_sin(gen::CHANNEL::X, gen::SAMPLE_SIZE, 0x0000, 0x7fff, gen::SAMPLE_SIZE/2, 0x0400);                    
-            
-            usb_interface.submit_instruction(ins, timeout);
-            sleep(Duration::from_millis(1));
-            
-            println!("{} {}ms", i, start.elapsed().as_millis());
-        }
-    //    break;
-    //}
-    let duration = total_start.elapsed();
-    println!("Timer per sample: {}", duration.as_millis()/0xfff);
-
-    //usb_interface.flush(timeout);
-    println!("Done");
-
+    for i in 0..((BUFFER_SIZE*4/64)) {
+        dev_handle.write_bulk(0x02, &buf[i*64..(i+1)*64], timeout).unwrap();
+        //sleep(Duration::from_millis(1/60));
+    }
+    
 }

@@ -108,5 +108,10 @@ void dac_submitInstructions(instructionBufferClusters_t instruction_buffer);
 */
 instructionBufferClusters_t dac_acquireInstructionBuffer();
 
+
+enum InputMode {
+    INSTRUCTION, RAW
+};
+
 #endif
 
